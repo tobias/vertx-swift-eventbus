@@ -1,71 +1,78 @@
+/**
+ * Copyright Red Hat, Inc 2016
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import Dispatch
 import Foundation
 import Socket
 import SwiftyJSON
 
+// TODO: check to make sure the socket is still open
+// TODO: reconnect?
+// TODO: error handler
+// TODO: handle replies
+
 public class EventBus {
     private let socket: Socket
 
     private let readQueue = dispatch_queue_create("read", DISPATCH_QUEUE_SERIAL)
-    private let pingQueue = dispatch_queue_create("ping", DISPATCH_QUEUE_SERIAL)
-    private let handlerQueue = dispatch_queue_create("handle", DISPATCH_QUEUE_CONCURRENT)
+    private let workQueue = dispatch_queue_create("work", DISPATCH_QUEUE_CONCURRENT)
     
-    private var handlers = [String : [(JSON) -> ()]]()
+    private var handlers = [String : [String : (JSON) -> ()]]()
+
+    private var open = false
     
-    public init(host: String, port: Int32) throws {
+    public init(host: String, port: Int, pingEvery: Int = 5000) throws {
         self.socket = try Socket.create()
-        try self.socket.connect(to: host, port: port)
+        try self.socket.connect(to: host, port: Int32(port))
         readLoop()
-        ping()
-        pingLoop(every: 5)
+        self.open = true
+        ping() // ping once to get this party started
+        pingLoop(every: pingEvery)
     }
 
     func readLoop() {
-        dispatch_async(readQueue!, {
-                      [unowned self] in
-                           self.readMessage()
-                           self.readLoop()
-            })
+        if self.open {
+            dispatch_async(readQueue!, {
+                          [unowned self] in
+                               self.readMessage()
+                               self.readLoop()
+                })
+        }
     }
 
-    func pingLoop(every: UInt64) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
-                                     Int64(every * NSEC_PER_SEC)),
-                       pingQueue!, {
-                      [unowned self] in
-                           self.ping()
-                           self.pingLoop(every: every)
-            })
+    func pingLoop(every: Int) {
+        if self.open {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                         Int64(every) * Int64(NSEC_PER_MSEC)),
+                           workQueue!, {
+                          [unowned self] in
+                               self.ping()
+                               self.pingLoop(every: every)
+                })
+        }
     }
-    
+   
     func readMessage() {
-        let data = NSMutableData()
         do {
-            let cnt = try self.socket.read(into: data)
-            var totalRead: Int32 = 0
-            if cnt > 0 {
-                totalRead += cnt
-                
-                // read until we at least have the size
-                while totalRead < 4 {
-                    totalRead += try self.socket.read(into: data)
-                }
-
-                let msgSize = bytesToInt(UnsafeBufferPointer<UInt8>(start: UnsafePointer<UInt8>(data.bytes),
-                                                                    count: 4))
-
-                // read until we have a full message
-                while totalRead < msgSize + 4 {
-                    totalRead += try self.socket.read(into: data)
-                }
-
-                // convert message to string and dispatch
-                let json = JSON(data: data.subdata(with: NSRange(location: 4, length: Int(msgSize))))
-                dispatch(json)
+            if let msg = try Util.read(from: self.socket) {
+                dispatch(msg)
             }
-        } catch {
+        } catch let error {
             //TODO: betterer
-            print("BOOM")
+            print("read failed: \(error)")
         }
     }
 
@@ -80,72 +87,64 @@ public class EventBus {
             return
         }
 
-        for handler in handlers {
-            dispatch_async(handlerQueue!, { handler(json) })
+        for handler in handlers.values {
+            dispatch_async(workQueue!, { handler(json) })
         }
     }
     
-    func bytesToInt(_ value: UnsafeBufferPointer<UInt8>) -> Int32 {
-        var result: Int32 = 0
-        
-        for n in 0..<4 {
-            result = result | (Int32(value[n]) << (8 * (3 - n)))
-        }
-
-        return result
-    }
-    
-    func intToBytes(_ value: Int32) -> [UInt8] {
-        var bytes = [UInt8]()
-        
-        for x in [3,2,1,0] {
-            bytes.append(UInt8(value >> Int32(x * 8)))
-        }
-        
-        return bytes
-    }
-
     func send(_ message: JSON) throws {
-        guard let m = message.rawString() else {
-            // TODO: throw
-            return
-        }
-                    
-        try send(m)
+        try Util.write(from: message, to: self.socket)
     }
     
     func send(_ message: String) throws {
-        print("SENDING \(message)")
-        
-        var data = [UInt8]()
-        
-        //write the size as 4 bytes, big-endian
-        data += intToBytes(Int32(message.utf8.count))
-        data += message.utf8
-        
-        try self.socket.write(from: data, bufSize: data.count)
+        try Util.write(from: message, to: self.socket)
     }
 
     func ping() {
         do {
             try send(JSON(["type": "ping"]))
-        } catch {
+        } catch let error {
             //TODO: better
-            print("ping failed!")
+            print("ping failed: \(error)")
         }
     }
-    
-    public func register(address: String, handler: (JSON) -> ()) throws {
+
+    // returns an id to use when unregistering
+    public func register(address: String, id: String? = nil, handler: (JSON) -> ()) throws -> String {
+        let _id = id ?? NSUUID().UUIDString
         if let _ = self.handlers[address] {
-            self.handlers[address]!.append(handler)
+            self.handlers[address]![_id] = handler
         } else {
-            self.handlers[address] = [handler]
+            self.handlers[address] = [_id : handler]
         }
         
         try send(JSON(["type": "register", "address": address])) //TODO: headers
+
+        return _id
     }
 
-    public func unregister(address: String, handler: (JSON) -> ()) throws {
+    // returns true if something was actually unregistered
+    public func unregister(address: String, id: String) throws -> Boolean {
+        guard var handlers = self.handlers[address],
+              let _ = handlers[id] else {
+                          
+            return false
+        }
+
+        handlers.removeValue(forKey: id)
+
+        if handlers.isEmpty {
+            try send(JSON(["type": "unregister", "address": address])) //TODO: headers
+        }
+            
+        return true
+    }
+
+    public func close() {
+        if self.open {
+            self.socket.close()
+            self.open = false
+        }
     }
     
 }

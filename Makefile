@@ -22,6 +22,7 @@ endif
 
 UNAME = ${shell uname}
 
+TEST_SERVER_PIDFILE = test-server/target/pidfile
 
 ifeq ($(UNAME), Darwin)
 SWIFTC_FLAGS = 
@@ -58,9 +59,10 @@ ifeq ($(UNAME), Linux)
 	bash ${BUILD_SCRIPTS_DIR}/generate_linux_main.sh
 endif
 
-test: build Tests/LinuxMain.swift
+test: build Tests/LinuxMain.swift ${TEST_SERVER_PIDFILE}
 	@echo --- Invoking swift test
 	swift test
+	$(MAKE) stop-test-server
 
 refetch:
 	@echo --- Removing Packages directory
@@ -71,11 +73,23 @@ refetch:
 clean:
 	@echo --- Invoking swift build --clean
 	swift build --clean
+	cd test-server && mvn clean
 ifeq ($(UNAME), Linux)
-	rm Tests/LinuxMain.swift
+	rm -f Tests/LinuxMain.swift
 endif
 
 run: build
 	./.build/debug/VertxEventBus
 
-.PHONY: clean build refetch run test custombuild
+test-server/target/test-server.jar:
+	cd test-server && mvn package
+
+${TEST_SERVER_PIDFILE}: test-server/target/test-server.jar
+	cd test-server && java -jar target/test-server.jar 7001 & echo "$$!" > ${TEST_SERVER_PIDFILE}
+	sleep 5 # give the server time to start
+
+stop-test-server:
+	kill `cat ${TEST_SERVER_PIDFILE}`
+	rm ${TEST_SERVER_PIDFILE}
+
+.PHONY: clean build refetch run test stop-test-server

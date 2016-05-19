@@ -23,27 +23,27 @@ import XCTest
 class EventBusTests: XCTestCase {
     
     static var allTests: [(String, (EventBusTests) -> () throws -> Void)] {
-	return [("testPings", testPings),
-                ("testRegister", testRegister)
-        ]}
+	return [("testRegister", testRegister),
+                ("testReply", testReply),
+                ("testSend", testSend),
+                ("testPublish", testPublish),
+                ("testErrorOnSend", testErrorOnSend)]}
 
-    var testServer: TestServer? = nil
     var eb: EventBus? = nil
     
     override func setUp() {
         super.setUp()
-        self.testServer = TestServer()
+        do {
+            self.eb = try EventBus(host: "localhost", port: 7001, pingEvery: 100)
+        } catch let error {
+            print("Failed to open eventbus: \(error)")
+        }
     }
 
     override func tearDown() {
         if let eb = self.eb {
             eb.close()
         }
-
-        if let server = self.testServer {
-            server.close()
-        }
-        
         super.tearDown()
     }
 
@@ -55,30 +55,29 @@ class EventBusTests: XCTestCase {
         wait(ms: s * 1000)
     }
     
-    func testPings() throws {
-        guard let server = self.testServer else {
-            XCTFail("No server!")
-            return 
+    func testRegister() throws {
+        var receivedMsgs = [JSON]()
+        
+        try self.eb!.register(address: "test.time") { msg in
+            receivedMsgs.append(msg)
         }
-
-        self.eb = try EventBus(host: "localhost", port: self.testServer!.port, pingEvery: 1100)
-        wait(s: 1)
-        XCTAssertEqual(server["ping"].count, 1, "first ping")
-        XCTAssertEqual(server["ping"].first!, JSON(["type": "ping"]))
-        wait(s: 1)
-        XCTAssertEqual(server["ping"].count, 2, "periodic ping")
+        wait(s: 2)
+        XCTAssert(!receivedMsgs.isEmpty)
+        if let msg = receivedMsgs.first {
+            XCTAssert(msg["body"]["now"] != nil)
+        }
+                    
     }
 
-    func testRegister() throws {
-        guard let server = self.testServer else {
-            XCTFail("No server!")
-            return 
-        }
+    func testReply() throws {
+    }
 
-        self.eb = try EventBus(host: "localhost", port: self.testServer!.port)
-        try self.eb!.register(address: "test") { _ in }
-        wait(ms: 200)
-        XCTAssertEqual(server["register"].count, 1)
-        XCTAssertEqual(server["register"], [JSON(["type": "register", "address": "test"])])
+    func testSend() throws {
+    }
+
+    func testPublish() throws {
+    }
+
+    func testErrorOnSend() throws {
     }
 }

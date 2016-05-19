@@ -13,6 +13,10 @@ To build on Ubuntu, you'll need to install the Swift snapshot, plus
 
 `git clone -b experimental/foundation https://github.com/apple/swift-corelibs-libdispatch.git && cd swift-corelibs-libdispatch && git submodule init && git submodule update && sh ./autogen.sh && ./configure --with-swift-toolchain=<path-to-swift>/usr --prefix=<path-to-swift>/usr && make && make install`
 
+## Running the tests
+
+The tests build a Vert.x server and launch it, so you'll need Java (8 or higher) and maven installed.
+
 ## License
 
 vertx-swift-eventbus is licensed under the Apache License, v2. See

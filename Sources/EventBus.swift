@@ -37,8 +37,8 @@ public class EventBus {
     public init(host: String, port: Int, pingEvery: Int = 5000) throws {
         self.socket = try Socket.create()
         try self.socket.connect(to: host, port: Int32(port))
-        readLoop()
         self.open = true
+        readLoop()
         ping() // ping once to get this party started
         pingLoop(every: pingEvery)
     }

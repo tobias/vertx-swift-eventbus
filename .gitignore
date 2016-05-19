@@ -2,3 +2,7 @@
 /.build
 /Packages
 /*.xcodeproj
+Tests/LinuxMain.swift
+target/
+.idea/
+*.iml

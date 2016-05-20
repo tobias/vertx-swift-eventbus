@@ -31,6 +31,7 @@ public class EventBus {
     private let workQueue = dispatch_queue_create("work", DISPATCH_QUEUE_CONCURRENT)
     
     private var handlers = [String : [String : (JSON) -> ()]]()
+    private var replyHandlers = [String: (JSON) -> ()]()
 
     private var open = false
     
@@ -77,18 +78,20 @@ public class EventBus {
     }
 
     func dispatch(_ json: JSON) {
+        // TODO: handle err messages
         guard let address = json["address"].string else {
             print("Invalid message, ignoring: \(json)")
             return
         }
 
-        guard let handlers = self.handlers[address] else {
+        if let h = self.handlers[address] {
+            for handler in h.values {
+                dispatch_async(workQueue!, { handler(json) })
+            }
+        } else if let h = self.replyHandlers[address] {
+            dispatch_async(workQueue!, { h(json) })
+        } else {
             print("no handlers for \(address), ignoring: \(json)")
-            return
-        }
-
-        for handler in handlers.values {
-            dispatch_async(workQueue!, { handler(json) })
         }
     }
     
@@ -109,9 +112,33 @@ public class EventBus {
         }
     }
 
+    func uuid() -> String {
+        return NSUUID().UUIDString
+    }
+    
+    public func send(to address: String, message: [String: Any], callback: ((JSON) -> ())? = nil) throws {
+        var msg: [String: Any] = ["type": "send", "address": address, "body": message]
+
+        if let cb = callback {
+            let replyAddress = uuid()
+            replyHandlers[replyAddress] = {[unowned self] m in
+                cb(m)
+                self.replyHandlers[replyAddress] = nil
+            }
+
+            msg["replyAddress"] = replyAddress
+        }
+        
+        try send(JSON(msg)) //TODO: headers
+    }
+    
+    public func publish(to address: String, message: [String: Any]) throws {
+        try send(JSON(["type": "publish", "address": address, "body": message] as [String: Any])) //TODO: headers
+    }
+    
     // returns an id to use when unregistering
     public func register(address: String, id: String? = nil, handler: (JSON) -> ()) throws -> String {
-        let _id = id ?? NSUUID().UUIDString
+        let _id = id ?? uuid()
         if let _ = self.handlers[address] {
             self.handlers[address]![_id] = handler
         } else {
@@ -140,6 +167,7 @@ public class EventBus {
         return true
     }
 
+              
     public func close() {
         if self.open {
             self.socket.close()

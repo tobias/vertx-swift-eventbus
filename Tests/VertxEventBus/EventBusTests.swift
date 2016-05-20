@@ -34,7 +34,7 @@ class EventBusTests: XCTestCase {
     override func setUp() {
         super.setUp()
         do {
-            self.eb = try EventBus(host: "localhost", port: 7001, pingEvery: 100)
+            self.eb = try EventBus(host: "localhost", port: 7001)
         } catch let error {
             print("Failed to open eventbus: \(error)")
         }
@@ -70,12 +70,44 @@ class EventBusTests: XCTestCase {
     }
 
     func testReply() throws {
+        var receivedMsgs = [JSON]()
+        
+        try self.eb!.send(to: "test.echo", message: ["foo": "bar"], callback: { m in
+                              receivedMsgs.append(m)
+                          })
+        wait(s: 2)
+        XCTAssert(!receivedMsgs.isEmpty)
+        if let msg = receivedMsgs.first {
+            XCTAssert(msg["body"]["foo"] == "bar")
+        }
     }
 
     func testSend() throws {
+        var receivedMsgs = [JSON]()
+        
+        try self.eb!.register(address: "test.echo.responses") { msg in
+            receivedMsgs.append(msg)
+        }
+        try self.eb!.send(to: "test.echo", message: ["foo": "bar"])
+        wait(s: 2)
+        XCTAssert(!receivedMsgs.isEmpty)
+        if let msg = receivedMsgs.first {
+            XCTAssert(msg["body"]["foo"] == "bar")
+        }
     }
 
     func testPublish() throws {
+        var receivedMsgs = [JSON]()
+        
+        try self.eb!.register(address: "test.echo.responses") { msg in
+            receivedMsgs.append(msg)
+        }
+        try self.eb!.publish(to: "test.echo", message: ["foo": "bar"])
+        wait(s: 2)
+        XCTAssert(!receivedMsgs.isEmpty)
+        if let msg = receivedMsgs.first {
+            XCTAssert(msg["body"]["foo"] == "bar")
+        }
     }
 
     func testErrorOnSend() throws {

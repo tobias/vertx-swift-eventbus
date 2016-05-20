@@ -17,6 +17,7 @@ package eventbusbridge;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.bridge.BridgeOptions;
@@ -36,12 +37,18 @@ public class Main {
         final int port = Integer.parseInt(args[0]);
 
         bridge.listen(port, res -> {
+            final EventBus eb = vertx.eventBus();
             vertx.setPeriodic(100, timer -> {
                 //System.out.println("Sending the time...");
-                vertx.eventBus().publish("test.time", new JsonObject().put("now", System.currentTimeMillis()));
+                eb.publish("test.time", new JsonObject().put("now", System.currentTimeMillis()));
             });
 
-            vertx.eventBus().consumer("test.echo",  m -> m.reply(m.body()));
+            vertx.eventBus().consumer("test.echo",  m -> {
+                //System.out.println("echo: " + m.body());
+                m.reply(m.body());
+                // send a copy to another address as well to test non-replyable messages
+                eb.publish("test.echo.responses", m.body());
+            });
         });
     }
 }

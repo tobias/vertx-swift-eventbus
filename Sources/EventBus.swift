@@ -27,8 +27,8 @@ import SwiftyJSON
 public class EventBus {
     private let socket: Socket
 
-    private let readQueue = dispatch_queue_create("read", DISPATCH_QUEUE_SERIAL)
-    private let workQueue = dispatch_queue_create("work", DISPATCH_QUEUE_CONCURRENT)
+    private let readQueue = DispatchQueue(label: "read")
+    private let workQueue = DispatchQueue(label: "work", attributes: [.concurrent])
     
     private var handlers = [String : [String : (JSON) -> ()]]()
     private var replyHandlers = [String: (JSON) -> ()]()
@@ -46,19 +46,19 @@ public class EventBus {
 
     func readLoop() {
         if self.open {
-            dispatch_async(readQueue!, {
-                          [unowned self] in
-                               self.readMessage()
-                               self.readLoop()
-                })
+            readQueue.async(execute: {
+                [unowned self] in
+                    self.readMessage()
+                    self.readLoop()
+            })
         }
     }
 
     func pingLoop(every: Int) {
         if self.open {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
-                                         Int64(every) * Int64(NSEC_PER_MSEC)),
-                           workQueue!, {
+            DispatchQueue.global()
+                .asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(every),
+                            execute: {
                           [unowned self] in
                                self.ping()
                                self.pingLoop(every: every)
@@ -86,10 +86,10 @@ public class EventBus {
 
         if let h = self.handlers[address] {
             for handler in h.values {
-                dispatch_async(workQueue!, { handler(json) })
+                workQueue.async(execute: { handler(json) })
             }
         } else if let h = self.replyHandlers[address] {
-            dispatch_async(workQueue!, { h(json) })
+            workQueue.async(execute: { h(json) })
         } else {
             print("no handlers for \(address), ignoring: \(json)")
         }
@@ -113,11 +113,13 @@ public class EventBus {
     }
 
     func uuid() -> String {
-        return NSUUID().UUIDString
+        return NSUUID().uuidString
     }
     
-    public func send(to address: String, message: [String: Any], callback: ((JSON) -> ())? = nil) throws {
-        var msg: [String: Any] = ["type": "send", "address": address, "body": message]
+    public func send(to address: String,
+                     message: [String: JSON.AnyType],
+                     callback: ((JSON) -> ())? = nil) throws {
+        var msg: [String: JSON.AnyType] = ["type": "send", "address": address, "body": message]
 
         if let cb = callback {
             let replyAddress = uuid()
@@ -132,8 +134,8 @@ public class EventBus {
         try send(JSON(msg)) //TODO: headers
     }
     
-    public func publish(to address: String, message: [String: Any]) throws {
-        try send(JSON(["type": "publish", "address": address, "body": message] as [String: Any])) //TODO: headers
+    public func publish(to address: String, message: [String: JSON.AnyType]) throws {
+        try send(JSON(["type": "publish", "address": address, "body": message] as [String: JSON.AnyType])) //TODO: headers
     }
     
     // returns an id to use when unregistering
@@ -151,7 +153,7 @@ public class EventBus {
     }
 
     // returns true if something was actually unregistered
-    public func unregister(address: String, id: String) throws -> Boolean {
+    public func unregister(address: String, id: String) throws -> Bool {
         guard var handlers = self.handlers[address],
               let _ = handlers[id] else {
                           

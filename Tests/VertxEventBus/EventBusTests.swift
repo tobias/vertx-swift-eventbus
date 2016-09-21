@@ -26,7 +26,9 @@ class EventBusTests: XCTestCase {
 	return [("testRegister", testRegister),
                 ("testReply", testReply),
                 ("testSend", testSend),
+                ("testSendWithHeaders", testSendWithHeaders),
                 ("testPublish", testPublish),
+                ("testPublishWithHeaders", testPublishWithHeaders),
                 ("testErrorOnSend", testErrorOnSend)]}
 
     var eb: EventBus? = nil
@@ -78,7 +80,7 @@ class EventBusTests: XCTestCase {
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["foo"] == "bar")
+            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
         }
     }
 
@@ -92,7 +94,22 @@ class EventBusTests: XCTestCase {
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["foo"] == "bar")
+            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
+        }
+    }
+
+    func testSendWithHeaders() throws {
+        var receivedMsgs = [JSON]()
+        
+        try self.eb!.register(address: "test.echo.responses") { msg in
+            receivedMsgs.append(msg)
+        }
+        try self.eb!.send(to: "test.echo", message: ["foo": "bar"], headers: ["ham": "biscuit"])
+        wait(s: 2)
+        XCTAssert(!receivedMsgs.isEmpty)
+        if let msg = receivedMsgs.first {
+            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
+            XCTAssert(msg["body"]["original-headers"]["ham"] == "biscuit")
         }
     }
 
@@ -106,7 +123,22 @@ class EventBusTests: XCTestCase {
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["foo"] == "bar")
+            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
+        }
+    }
+
+    func testPublishWithHeaders() throws {
+        var receivedMsgs = [JSON]()
+        
+        try self.eb!.register(address: "test.echo.responses") { msg in
+            receivedMsgs.append(msg)
+        }
+        try self.eb!.publish(to: "test.echo", message: ["foo": "bar"], headers: ["ham": "biscuit"])
+        wait(s: 2)
+        XCTAssert(!receivedMsgs.isEmpty)
+        if let msg = receivedMsgs.first {
+            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
+            XCTAssert(msg["body"]["original-headers"]["ham"] == "biscuit")
         }
     }
 

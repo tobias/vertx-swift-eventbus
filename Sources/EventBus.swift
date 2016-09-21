@@ -118,9 +118,10 @@ public class EventBus {
     
     public func send(to address: String,
                      message: [String: JSON.AnyType],
+                     headers: [String: String]? = nil,
                      callback: ((JSON) -> ())? = nil) throws {
-        var msg: [String: JSON.AnyType] = ["type": "send", "address": address, "body": message]
-
+        var msg: [String: JSON.AnyType] = ["type": "send", "address": address, "body": message, "headers": headers ?? [String: String]()]
+        
         if let cb = callback {
             let replyAddress = uuid()
             replyHandlers[replyAddress] = {[unowned self] m in
@@ -131,11 +132,16 @@ public class EventBus {
             msg["replyAddress"] = replyAddress
         }
         
-        try send(JSON(msg)) //TODO: headers
+        try send(JSON(msg))
     }
     
-    public func publish(to address: String, message: [String: JSON.AnyType]) throws {
-        try send(JSON(["type": "publish", "address": address, "body": message] as [String: JSON.AnyType])) //TODO: headers
+    public func publish(to address: String,
+                        message: [String: JSON.AnyType],
+                        headers: [String: String]? = nil) throws {
+        try send(JSON(["type": "publish",
+                       "address": address,
+                       "body": message,
+                       "headers": headers ?? [String: String]()] as [String: JSON.AnyType]))
     }
     
     // returns an id to use when unregistering

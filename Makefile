@@ -68,7 +68,7 @@ refetch:
 	@echo --- Removing Packages directory
 	rm -rf Packages
 	@echo --- Fetching dependencies
-	swift build --fetch
+	swift package fetch
 
 clean:
 	@echo --- Invoking swift build --clean

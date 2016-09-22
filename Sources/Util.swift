@@ -22,7 +22,7 @@ public class Util {
     public class func readInt32(_ value: NSData) -> Int32 {
         var result: Int32 = 0
 
-        let bytes = UnsafeBufferPointer<UInt8>(start: UnsafePointer<UInt8>(value.bytes), count: 4)
+        let bytes = UnsafeBufferPointer<UInt8>(start: value.bytes.assumingMemoryBound(to: UInt8.self), count: 4)
         for n in 0...3 {
             result = result | (Int32(bytes[n]) << (8 * (3 - n)))
         }

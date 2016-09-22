@@ -19,6 +19,6 @@ import PackageDescription
 let package = Package(
         name: "VertxEventBus",
         dependencies: [
-          .Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 7),
-          .Package(url: "https://github.com/IBM-Swift/SwiftyJSON.git", majorVersion: 11, minor: 0)
+          .Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 11),
+          .Package(url: "https://github.com/IBM-Swift/SwiftyJSON.git", majorVersion: 14, minor: 2)
         ])

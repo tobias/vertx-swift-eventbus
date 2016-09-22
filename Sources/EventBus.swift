@@ -117,10 +117,10 @@ public class EventBus {
     }
     
     public func send(to address: String,
-                     message: [String: JSON.AnyType],
+                     message: [String: Any],
                      headers: [String: String]? = nil,
                      callback: ((JSON) -> ())? = nil) throws {
-        var msg: [String: JSON.AnyType] = ["type": "send", "address": address, "body": message, "headers": headers ?? [String: String]()]
+        var msg: [String: Any] = ["type": "send", "address": address, "body": message, "headers": headers ?? [String: String]()]
         
         if let cb = callback {
             let replyAddress = uuid()
@@ -136,16 +136,16 @@ public class EventBus {
     }
     
     public func publish(to address: String,
-                        message: [String: JSON.AnyType],
+                        message: [String: Any],
                         headers: [String: String]? = nil) throws {
         try send(JSON(["type": "publish",
                        "address": address,
                        "body": message,
-                       "headers": headers ?? [String: String]()] as [String: JSON.AnyType]))
+                       "headers": headers ?? [String: String]()] as [String: Any]))
     }
     
     // returns an id to use when unregistering
-    public func register(address: String, id: String? = nil, handler: (JSON) -> ()) throws -> String {
+    public func register(address: String, id: String? = nil, handler: @escaping (JSON) -> ()) throws -> String {
         let _id = id ?? uuid()
         if let _ = self.handlers[address] {
             self.handlers[address]![_id] = handler

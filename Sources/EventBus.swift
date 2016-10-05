@@ -47,25 +47,23 @@ public class EventBus {
     func readLoop() {
         if self.open {
             readQueue.async(execute: {
-                [unowned self] in
-                    self.readMessage()
-                    self.readLoop()
-            })
+                                self.readMessage()
+                                self.readLoop()
+                            })
         }
     }
 
     func pingLoop(every: Int) {
         if self.open {
             DispatchQueue.global()
-                .asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(every),
-                            execute: {
-                          [unowned self] in
-                               self.ping()
-                               self.pingLoop(every: every)
-                })
+              .asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(every),
+                          execute: {
+                              self.ping()
+                              self.pingLoop(every: every)
+                          })
         }
     }
-   
+
     func readMessage() {
         do {
             if let msg = try Util.read(from: self.socket) {

@@ -24,17 +24,24 @@ import SwiftyJSON
 // TODO: error handler
 // TODO: handle replies
 
+public enum EventBusError: Error {
+    case serverError(message: String)
+    case unknownMessage(message: JSON)
+    case unknownError(error: Error)
+}
+
 public class EventBus {
     private let socket: Socket
 
     private let readQueue = DispatchQueue(label: "read")
     private let workQueue = DispatchQueue(label: "work", attributes: [.concurrent])
-    
+
+    private var errorHandler: ((EventBusError) -> ())? = nil
     private var handlers = [String : [String : (JSON) -> ()]]()
     private var replyHandlers = [String: (JSON) -> ()]()
 
     private var open = false
-    
+
     public init(host: String, port: Int, pingEvery: Int = 5000) throws {
         self.socket = try Socket.create()
         try self.socket.connect(to: host, port: Int32(port))
@@ -70,15 +77,25 @@ public class EventBus {
                 dispatch(msg)
             }
         } catch let error {
-            //TODO: betterer
-            print("read failed: \(error)")
+            handleError(EventBusError.unknownError(error: error))
         }
     }
 
+    func handleError(_ error: EventBusError) {
+        if let h = self.errorHandler {
+            h(error)
+        }
+    }
+    
     func dispatch(_ json: JSON) {
-        // TODO: handle err messages
         guard let address = json["address"].string else {
-            print("Invalid message, ignoring: \(json)")
+            if let type = json["type"].string,
+               type == "err" {
+                handleError(EventBusError.serverError(message: json["message"].string!))
+            } else {
+                handleError(EventBusError.unknownMessage(message: json))
+            }
+
             return
         }
 
@@ -88,15 +105,13 @@ public class EventBus {
             }
         } else if let h = self.replyHandlers[address] {
             workQueue.async(execute: { h(json) })
-        } else {
-            print("no handlers for \(address), ignoring: \(json)")
         }
     }
-    
+
     func send(_ message: JSON) throws {
         try Util.write(from: message, to: self.socket)
     }
-    
+
     func send(_ message: String) throws {
         try Util.write(from: message, to: self.socket)
     }
@@ -105,21 +120,20 @@ public class EventBus {
         do {
             try send(JSON(["type": "ping"]))
         } catch let error {
-            //TODO: better
-            print("ping failed: \(error)")
+            handleError(EventBusError.unknownError(error: error))
         }
     }
 
     func uuid() -> String {
         return NSUUID().uuidString
     }
-    
+
     public func send(to address: String,
                      message: [String: Any],
                      headers: [String: String]? = nil,
                      callback: ((JSON) -> ())? = nil) throws {
         var msg: [String: Any] = ["type": "send", "address": address, "body": message, "headers": headers ?? [String: String]()]
-        
+
         if let cb = callback {
             let replyAddress = uuid()
             replyHandlers[replyAddress] = {[unowned self] m in
@@ -129,10 +143,10 @@ public class EventBus {
 
             msg["replyAddress"] = replyAddress
         }
-        
+
         try send(JSON(msg))
     }
-    
+
     public func publish(to address: String,
                         message: [String: Any],
                         headers: [String: String]? = nil) throws {
@@ -141,7 +155,7 @@ public class EventBus {
                        "body": message,
                        "headers": headers ?? [String: String]()] as [String: Any]))
     }
-    
+
     // returns an id to use when unregistering
     public func register(address: String, id: String? = nil, handler: @escaping (JSON) -> ()) throws -> String {
         let _id = id ?? uuid()
@@ -150,7 +164,7 @@ public class EventBus {
         } else {
             self.handlers[address] = [_id : handler]
         }
-        
+
         try send(JSON(["type": "register", "address": address])) //TODO: headers
 
         return _id
@@ -160,20 +174,24 @@ public class EventBus {
     public func unregister(address: String, id: String) throws -> Bool {
         guard var handlers = self.handlers[address],
               let _ = handlers[id] else {
-                          
-            return false
-        }
+
+                  return false
+              }
 
         handlers.removeValue(forKey: id)
 
         if handlers.isEmpty {
             try send(JSON(["type": "unregister", "address": address])) //TODO: headers
         }
-            
+
         return true
     }
 
-              
+    public func register(errorHandler: @escaping (EventBusError) -> ()) {
+        self.errorHandler = errorHandler
+    }
+
+
     public func close() {
         if self.open {
             self.socket.close()

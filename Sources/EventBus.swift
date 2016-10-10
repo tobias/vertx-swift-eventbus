@@ -37,8 +37,8 @@ public class EventBus {
     private let workQueue = DispatchQueue(label: "work", attributes: [.concurrent])
 
     private var errorHandler: ((EventBusError) -> ())? = nil
-    private var handlers = [String : [String : (JSON) -> ()]]()
-    private var replyHandlers = [String: (JSON) -> ()]()
+    private var handlers = [String : [String : (Message) -> ()]]()
+    private var replyHandlers = [String: (Message) -> ()]()
 
     private var open = false
 
@@ -86,7 +86,7 @@ public class EventBus {
             h(error)
         }
     }
-    
+
     func dispatch(_ json: JSON) {
         guard let address = json["address"].string else {
             if let type = json["type"].string,
@@ -99,12 +99,13 @@ public class EventBus {
             return
         }
 
+        let msg = Message(basis: json, eventBus: self)
         if let h = self.handlers[address] {
             for handler in h.values {
-                workQueue.async(execute: { handler(json) })
+                workQueue.async(execute: { handler(msg) })
             }
         } else if let h = self.replyHandlers[address] {
-            workQueue.async(execute: { h(json) })
+            workQueue.async(execute: { h(msg) })
         }
     }
 
@@ -129,14 +130,14 @@ public class EventBus {
     }
 
     public func send(to address: String,
-                     message: [String: Any],
+                     body: [String: Any],
                      headers: [String: String]? = nil,
-                     callback: ((JSON) -> ())? = nil) throws {
-        var msg: [String: Any] = ["type": "send", "address": address, "body": message, "headers": headers ?? [String: String]()]
+                     callback: ((Message) -> ())? = nil) throws {
+        var msg: [String: Any] = ["type": "send", "address": address, "body": body, "headers": headers ?? [String: String]()]
 
         if let cb = callback {
             let replyAddress = uuid()
-            replyHandlers[replyAddress] = {[unowned self] m in
+            replyHandlers[replyAddress] = {[unowned self] (m) in
                 cb(m)
                 self.replyHandlers[replyAddress] = nil
             }
@@ -148,16 +149,16 @@ public class EventBus {
     }
 
     public func publish(to address: String,
-                        message: [String: Any],
+                        body: [String: Any],
                         headers: [String: String]? = nil) throws {
         try send(JSON(["type": "publish",
                        "address": address,
-                       "body": message,
+                       "body": body,
                        "headers": headers ?? [String: String]()] as [String: Any]))
     }
 
     // returns an id to use when unregistering
-    public func register(address: String, id: String? = nil, handler: @escaping (JSON) -> ()) throws -> String {
+    public func register(address: String, id: String? = nil, handler: @escaping ((Message) -> ())) throws -> String {
         let _id = id ?? uuid()
         if let _ = self.handlers[address] {
             self.handlers[address]![_id] = handler
@@ -198,5 +199,5 @@ public class EventBus {
             self.open = false
         }
     }
-    
+
 }

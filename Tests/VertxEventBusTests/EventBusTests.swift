@@ -21,10 +21,11 @@ import XCTest
 @testable import VertxEventBus
 
 class EventBusTests: XCTestCase {
-    
+
     static var allTests: [(String, (EventBusTests) -> () throws -> Void)] {
-	return [("testRegister", testRegister),
-                ("testReply", testReply),
+        return [("testRegister", testRegister),
+                ("testRemoteReply", testRemoteReply),
+                //("testLocalReply", testLocalReply),
                 ("testSend", testSend),
                 ("testSendWithHeaders", testSendWithHeaders),
                 ("testPublish", testPublish),
@@ -32,7 +33,7 @@ class EventBusTests: XCTestCase {
                 ("testErrorOnSend", testErrorOnSend)]}
 
     var eb: EventBus? = nil
-    
+
     override func setUp() {
         super.setUp()
         do {
@@ -56,89 +57,120 @@ class EventBusTests: XCTestCase {
     func wait(s: UInt32) {
         wait(ms: s * 1000)
     }
-    
+
     func testRegister() throws {
-        var receivedMsgs = [JSON]()
-        
-        try self.eb!.register(address: "test.time") { msg in
+        var receivedMsgs = [Message]()
+
+        let _ = try self.eb!.register(address: "test.time") { msg in
             receivedMsgs.append(msg)
         }
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["now"] != nil)
+            XCTAssert(msg.body["now"] != nil)
         }
-                    
+
     }
 
-    func testReply() throws {
-        var receivedMsgs = [JSON]()
-        
-        try self.eb!.send(to: "test.echo", message: ["foo": "bar"], callback: { m in
+    func testRemoteReply() throws {
+        var receivedMsgs = [Message]()
+
+        try self.eb!.send(to: "test.echo", body: ["foo": "bar"], callback: { m in
                               receivedMsgs.append(m)
                           })
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
+            XCTAssert(msg.body["original-body"]["foo"] == "bar")
+        }
+    }
+
+    func testLocalReply() throws {
+        var receivedMsgs = [Message]()
+
+        try self.eb!.send(to: "test.ping-pong", body: ["counter": 0],
+                          callback: { m in
+                              receivedMsgs.append(m)
+                              let count = m.body["counter"].intValue
+                              print("ping-pong: count is \(count)")
+                              do {
+                                  try m.reply(body: ["counter": count + 1],
+                                              callback: { m in
+                                                  do {
+                                                      receivedMsgs.append(m)
+                                                      let count = m.body["counter"].intValue
+                                                      print("ping-pong: count is \(count)")
+                                                      try m.reply(["counter": count + 1])
+                                                  } catch let error {
+                                                      XCTFail(String(describing: error))
+                                                  }
+                                              })
+                              } catch let error {
+                                  XCTFail(String(describing: error))
+                              }
+                          })
+        wait(s: 2)
+        XCTAssert(receivedMsgs.count == 2)
+        for (idx, msg) in receivedMsgs.enumerated() {
+            XCTAssert(msg.body["counter"].intValue == idx * 2 + 1)
         }
     }
 
     func testSend() throws {
-        var receivedMsgs = [JSON]()
-        
-        try self.eb!.register(address: "test.echo.responses") { msg in
+        var receivedMsgs = [Message]()
+
+        let _ = try self.eb!.register(address: "test.echo.responses") { msg in
             receivedMsgs.append(msg)
         }
-        try self.eb!.send(to: "test.echo", message: ["foo": "bar"])
+        try self.eb!.send(to: "test.echo", body: ["foo": "bar"])
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
+            XCTAssert(msg.body["original-body"]["foo"] == "bar")
         }
     }
 
     func testSendWithHeaders() throws {
-        var receivedMsgs = [JSON]()
-        
-        try self.eb!.register(address: "test.echo.responses") { msg in
+        var receivedMsgs = [Message]()
+
+        let _ = try self.eb!.register(address: "test.echo.responses") { msg in
             receivedMsgs.append(msg)
         }
-        try self.eb!.send(to: "test.echo", message: ["foo": "bar"], headers: ["ham": "biscuit"])
+        try self.eb!.send(to: "test.echo", body: ["foo": "bar"], headers: ["ham": "biscuit"])
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
-            XCTAssert(msg["body"]["original-headers"]["ham"] == "biscuit")
+            XCTAssert(msg.body["original-body"]["foo"] == "bar")
+            XCTAssert(msg.body["original-headers"]["ham"] == "biscuit")
         }
     }
 
     func testPublish() throws {
-        var receivedMsgs = [JSON]()
-        
-        try self.eb!.register(address: "test.echo.responses") { msg in
+        var receivedMsgs = [Message]()
+
+        let _ = try self.eb!.register(address: "test.echo.responses") { msg in
             receivedMsgs.append(msg)
         }
-        try self.eb!.publish(to: "test.echo", message: ["foo": "bar"])
+        try self.eb!.publish(to: "test.echo", body: ["foo": "bar"])
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
+            XCTAssert(msg.body["original-body"]["foo"] == "bar")
         }
     }
 
     func testPublishWithHeaders() throws {
-        var receivedMsgs = [JSON]()
-        
-        try self.eb!.register(address: "test.echo.responses") { msg in
+        var receivedMsgs = [Message]()
+
+        let _ = try self.eb!.register(address: "test.echo.responses") { msg in
             receivedMsgs.append(msg)
         }
-        try self.eb!.publish(to: "test.echo", message: ["foo": "bar"], headers: ["ham": "biscuit"])
+        try self.eb!.publish(to: "test.echo", body: ["foo": "bar"], headers: ["ham": "biscuit"])
         wait(s: 2)
         XCTAssert(!receivedMsgs.isEmpty)
         if let msg = receivedMsgs.first {
-            XCTAssert(msg["body"]["original-body"]["foo"] == "bar")
-            XCTAssert(msg["body"]["original-headers"]["ham"] == "biscuit")
+            XCTAssert(msg.body["original-body"]["foo"] == "bar")
+            XCTAssert(msg.body["original-headers"]["ham"] == "biscuit")
         }
     }
 

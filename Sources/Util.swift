@@ -79,7 +79,8 @@ public class Util {
             while totalRead < msgSize + 4 {
                 totalRead += try from.read(into: data)
             }
-            
+
+            //print("TC: rawMessage = \(String(data: data.subdata(with: NSRange(location: 4, length: Int(msgSize))), encoding: String.Encoding.utf8))")
             return JSON(data: data.subdata(with: NSRange(location: 4, length: Int(msgSize))))
         }
 

@@ -86,7 +86,7 @@ test-server/target/test-server.jar:
 
 ${TEST_SERVER_PIDFILE}: test-server/target/test-server.jar
 	cd test-server && java -jar target/test-server.jar 7001 & echo "$$!" > ${TEST_SERVER_PIDFILE}
-	sleep 5 # give the server time to start
+	sleep 10 # give the server time to start
 
 stop-test-server:
 	kill `cat ${TEST_SERVER_PIDFILE}`

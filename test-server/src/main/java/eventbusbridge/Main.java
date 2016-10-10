@@ -15,6 +15,9 @@
  */
 package eventbusbridge;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -28,7 +31,8 @@ import io.vertx.ext.eventbus.bridge.tcp.TcpEventBusBridge;
 public class Main {
 
     public static void main(String[] args) {
-        Vertx vertx = Vertx.vertx();
+        final Vertx vertx = Vertx.vertx();
+        final EventBus eb = vertx.eventBus();
         TcpEventBusBridge bridge = TcpEventBusBridge.create(
                 vertx,
                 new BridgeOptions()
@@ -37,9 +41,8 @@ public class Main {
 
         final int port = Integer.parseInt(args[0]);
 
-        bridge.listen(port, res -> {
+        bridge.listen(port, "127.0.0.1", res -> {
             System.out.println("Vert.x bridge started on " + port);
-            final EventBus eb = vertx.eventBus();
             vertx.setPeriodic(100, timer -> {
                 //System.out.println("Sending the time...");
                 eb.publish("test.time", new JsonObject().put("now", System.currentTimeMillis()));
@@ -58,6 +61,18 @@ public class Main {
                 // send a copy to another address as well to test non-replyable messages
                 eb.publish("test.echo.responses", reply);
             });
+
+            vertx.eventBus().consumer("test.ping-pong", Main::pingPong);
         });
+    }
+
+    static final AsyncResultHandler<Message<JsonObject>> pingPongReply = event -> pingPong(event.result());
+
+    static void pingPong(final Message<JsonObject> m) {
+        final int counter = m.body().getInteger("counter");
+        System.out.println("ping-pong: count is " + counter);
+        final JsonObject reply = new JsonObject();
+        reply.put("counter", counter + 1);
+        m.reply(reply, pingPongReply);
     }
 }

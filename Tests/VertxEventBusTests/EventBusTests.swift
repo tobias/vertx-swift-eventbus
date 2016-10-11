@@ -22,6 +22,16 @@ import XCTest
 
 class EventBusTests: XCTestCase {
 
+    static var allTests: [(String, (EventBusTests) -> () throws -> Void)] {
+        return [("testRegister", testRegister),
+                ("testRemoteReply", testRemoteReply),
+                //("testLocalReply", testLocalReply),
+                ("testSend", testSend),
+                ("testSendWithHeaders", testSendWithHeaders),
+                ("testPublish", testPublish),
+                ("testPublishWithHeaders", testPublishWithHeaders),
+                ("testErrorOnSend", testErrorOnSend)]}
+
     var eb: EventBus? = nil
 
     override func setUp() {

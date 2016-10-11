@@ -52,6 +52,7 @@ public class Util {
     }
     
     public class func write(from: String, to sock: Socket) throws {
+        //print("TC: out - \(from)")
         var data = [UInt8]()
 
         //write the size as 4 bytes, big-endian
@@ -80,7 +81,7 @@ public class Util {
                 totalRead += try from.read(into: data)
             }
 
-            //print("TC: rawMessage = \(String(data: data.subdata(with: NSRange(location: 4, length: Int(msgSize))), encoding: String.Encoding.utf8))")
+            //print("TC:  in - \(String(data: data.subdata(with: NSRange(location: 4, length: Int(msgSize))), encoding: String.Encoding.utf8))")
             return JSON(data: data.subdata(with: NSRange(location: 4, length: Int(msgSize))))
         }
 

@@ -100,7 +100,17 @@ class EventBusTests: XCTestCase {
                                                       receivedMsgs.append(m)
                                                       let count = m.body["counter"].intValue
                                                       print("ping-pong: count is \(count)")
-                                                      try m.reply(["counter": count + 1])
+                                                      try m.reply(body: ["counter": count + 1],
+                                                                  callback: { m in
+                                                                      let count = m.body["counter"].intValue
+                                                                      print("ping-pong: count is \(count)")
+                                                                      receivedMsgs.append(m)
+                                                                      do {
+                                                                          try m.reply(["counter": count + 1])
+                                                                      } catch let error {
+                                                                          XCTFail(String(describing: error))
+                                                                      }
+                                                                  })
                                                   } catch let error {
                                                       XCTFail(String(describing: error))
                                                   }
@@ -110,7 +120,7 @@ class EventBusTests: XCTestCase {
                               }
                           })
         wait(s: 2)
-        XCTAssert(receivedMsgs.count == 2)
+        XCTAssert(receivedMsgs.count == 3)
         for (idx, msg) in receivedMsgs.enumerated() {
             XCTAssert(msg.body["counter"].intValue == idx * 2 + 1)
         }

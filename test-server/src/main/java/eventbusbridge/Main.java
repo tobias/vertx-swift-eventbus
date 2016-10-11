@@ -68,7 +68,7 @@ public class Main {
 
                 reply.put("original-body", m.body())
                         .put("original-headers", headers);
-                System.out.println("REPLY: " + m.headers() + " | " + reply);
+                //System.out.println("REPLY: " + m.headers() + " | " + reply);
                 m.reply(reply);
                 // send a copy to another address as well to test non-replyable messages
                 eb.publish("test.echo.responses", reply);

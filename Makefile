@@ -59,10 +59,9 @@ ifeq ($(UNAME), Linux)
 	bash ${BUILD_SCRIPTS_DIR}/generate_linux_main.sh
 endif
 
-test: build Tests/LinuxMain.swift ${TEST_SERVER_PIDFILE}
-	@echo --- Invoking swift test
-	swift test
-	$(MAKE) stop-test-server
+test: build Tests/LinuxMain.swift test-server/target/test-server.jar
+	@echo --- Invoking tests
+	${BUILD_SCRIPTS_DIR}/run-tests.sh
 
 refetch:
 	@echo --- Removing Packages directory
@@ -84,12 +83,4 @@ run: build
 test-server/target/test-server.jar:
 	cd test-server && mvn package
 
-${TEST_SERVER_PIDFILE}: test-server/target/test-server.jar
-	cd test-server && java -jar target/test-server.jar 7001 & echo "$$!" > ${TEST_SERVER_PIDFILE}
-	sleep 10 # give the server time to start
-
-stop-test-server:
-	kill `cat ${TEST_SERVER_PIDFILE}`
-	rm ${TEST_SERVER_PIDFILE}
-
-.PHONY: clean build refetch run test stop-test-server
+.PHONY: clean build refetch run test 

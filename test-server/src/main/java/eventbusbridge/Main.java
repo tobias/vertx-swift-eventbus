@@ -15,14 +15,13 @@
  */
 package eventbusbridge;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import io.vertx.core.AsyncResult;
+import java.io.File;
+import java.io.IOException;
+
 import io.vertx.core.AsyncResultHandler;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.bridge.BridgeOptions;
 import io.vertx.ext.bridge.PermittedOptions;
@@ -40,9 +39,22 @@ public class Main {
                 .addInboundPermitted(new PermittedOptions().setAddressRegex("test.*")));
 
         final int port = Integer.parseInt(args[0]);
+        final File semaphoreFile;
+        if (args.length > 1) {
+            semaphoreFile = new File(args[1]);
+        } else {
+            semaphoreFile = null;
+        }
 
-        bridge.listen(port, "127.0.0.1", res -> {
+        bridge.listen(port, res -> {
             System.out.println("Vert.x bridge started on " + port);
+            if (semaphoreFile != null) {
+                try {
+                    semaphoreFile.createNewFile();
+                } catch (IOException e) {
+                    System.err.println(e);
+                }
+            }
             vertx.setPeriodic(100, timer -> {
                 //System.out.println("Sending the time...");
                 eb.publish("test.time", new JsonObject().put("now", System.currentTimeMillis()));

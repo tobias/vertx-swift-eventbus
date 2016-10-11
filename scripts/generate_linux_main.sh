@@ -33,7 +33,7 @@ cat << 'EOF' > ${OUTPUT_FILE}
 import XCTest
 EOF
 
-find ${TESTS_DIR} -maxdepth 1 -mindepth 1 -type d -printf '@testable import %fTestSuite\n' >> ${OUTPUT_FILE}
+find ${TESTS_DIR} -maxdepth 1 -mindepth 1 -type d -printf '@testable import %f\n' >> ${OUTPUT_FILE}
 
 echo >> ${OUTPUT_FILE}
 echo XCTMain\(\[ >> ${OUTPUT_FILE}

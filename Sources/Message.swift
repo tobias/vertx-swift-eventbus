@@ -20,7 +20,7 @@ public class Message {
     let basis: JSON
     let eventBus: EventBus
     
-    var body: JSON {
+    public var body: JSON {
         return basis["body"]
     }
 

@@ -14,27 +14,14 @@
  * limitations under the License.
  **/
 
-public struct Result {
-    public let successful: Bool
-    public let error: EventBusError?
-    public let message: Message?
+import SwiftyJSON
 
-    init(successful: Bool, error: EventBusError?, message: Message?) {
-        self.successful = successful
-        self.error = error
-        self.message = message
-    }
+public protocol EventBusError : Error {}
 
-    public init(_ error: EventBusError) {
-        self.init(successful: false, error: error, message: nil)
-    }
-
-    public init(_ message: Message) {
-        self.init(successful: true, error: nil, message: message)
-    }
+public enum ProtocolError: EventBusError {
+    case serverError(message: String)
+    case unknownMessage(message: JSON)
+    case unknownError(error: Error)
 }
 
-
-
-
-
+public class TimeoutError: EventBusError {}

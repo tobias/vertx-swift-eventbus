@@ -24,32 +24,17 @@ import SwiftyJSON
 // TODO: error handler
 // TODO: handle replies
 
-public enum EventBusError: Error {
-    case serverError(message: String)
-    case unknownMessage(message: JSON)
-    case unknownError(error: Error)
-}
-
 public class EventBus {
     private let socket: Socket
 
     private let readQueue = DispatchQueue(label: "read")
     private let workQueue = DispatchQueue(label: "work", attributes: [.concurrent])
 
-    private var errorHandler: ((EventBusError) -> ())? = nil
+    private var errorHandler: ((ProtocolError) -> ())? = nil
     private var handlers = [String : [String : (Message) -> ()]]()
     private var replyHandlers = [String: (Result) -> ()]()
 
     private var open = false
-
-    public init(host: String, port: Int, pingEvery: Int = 5000) throws {
-        self.socket = try Socket.create()
-        try self.socket.connect(to: host, port: Int32(port))
-        self.open = true
-        readLoop()
-        ping() // ping once to get this party started
-        pingLoop(every: pingEvery)
-    }
 
     func readLoop() {
         if self.open {
@@ -77,11 +62,11 @@ public class EventBus {
                 dispatch(msg)
             }
         } catch let error {
-            handleError(EventBusError.unknownError(error: error))
+            handleError(ProtocolError.unknownError(error: error))
         }
     }
 
-    func handleError(_ error: EventBusError) {
+    func handleError(_ error: ProtocolError) {
         if let h = self.errorHandler {
             h(error)
         }
@@ -91,9 +76,9 @@ public class EventBus {
         guard let address = json["address"].string else {
             if let type = json["type"].string,
                type == "err" {
-                handleError(EventBusError.serverError(message: json["message"].string!))
+                handleError(ProtocolError.serverError(message: json["message"].string!))
             } else {
-                handleError(EventBusError.unknownMessage(message: json))
+                handleError(ProtocolError.unknownMessage(message: json))
             }
 
             return
@@ -121,7 +106,7 @@ public class EventBus {
         do {
             try send(JSON(["type": "ping"]))
         } catch let error {
-            handleError(EventBusError.unknownError(error: error))
+            handleError(ProtocolError.unknownError(error: error))
         }
     }
 
@@ -129,9 +114,21 @@ public class EventBus {
         return NSUUID().uuidString
     }
 
+    // public API
+
+    public init(host: String, port: Int, pingEvery: Int = 5000) throws {
+        self.socket = try Socket.create()
+        try self.socket.connect(to: host, port: Int32(port))
+        self.open = true
+        readLoop()
+        ping() // ping once to get this party started
+        pingLoop(every: pingEvery)
+    }
+
     public func send(to address: String,
                      body: [String: Any],
                      headers: [String: String]? = nil,
+                     replyTimeout: Int = 30000, // 30 seconds
                      callback: ((Result) -> ())? = nil) throws {
         var msg: [String: Any] = ["type": "send", "address": address, "body": body, "headers": headers ?? [String: String]()]
 
@@ -143,8 +140,16 @@ public class EventBus {
             }
 
             msg["replyAddress"] = replyAddress
-        }
 
+            DispatchQueue.global()
+              .asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(replyTimeout),
+                          execute: {
+                              if let cb = self.replyHandlers[replyAddress] {
+                                  cb(Result(TimeoutError()))
+                              }
+                          })
+        }
+        
         try send(JSON(msg))
     }
 
@@ -188,7 +193,7 @@ public class EventBus {
         return true
     }
 
-    public func register(errorHandler: @escaping (EventBusError) -> ()) {
+    public func register(errorHandler: @escaping (ProtocolError) -> ()) {
         self.errorHandler = errorHandler
     }
 

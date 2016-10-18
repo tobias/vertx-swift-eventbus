@@ -25,8 +25,9 @@ class EventBusTests: XCTestCase {
     static var allTests: [(String, (EventBusTests) -> () throws -> Void)] {
         return [("testRegister", testRegister),
                 ("testRemoteReply", testRemoteReply),
-                //("testLocalReply", testLocalReply),
+                ("testLocalReply", testLocalReply),
                 ("testSend", testSend),
+                ("testTimeoutOnSendReply", testTimeoutOnSendReply),
                 ("testSendWithHeaders", testSendWithHeaders),
                 ("testPublish", testPublish),
                 ("testPublishWithHeaders", testPublishWithHeaders),
@@ -146,6 +147,15 @@ class EventBusTests: XCTestCase {
         }
     }
 
+    func testTimeoutOnSendReply() throws {
+        var result: Result?
+        try self.eb!.send(to: "test.non-exist", body: ["what": "ever"], replyTimeout: 1) { result = $0 }
+        wait(s: 2)
+        XCTAssert(result != nil)
+        XCTAssert(result!.error != nil)
+        XCTAssert(result!.error! is TimeoutError)
+    }
+    
     func testSendWithHeaders() throws {
         var results = [Message]()
 

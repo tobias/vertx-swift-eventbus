@@ -37,7 +37,7 @@ public class Message {
         try reply(body: body)
     }
     
-    public func reply(body: [String: Any], headers: [String: String]? = nil, callback: ((Message) -> ())? = nil) throws {
+    public func reply(body: [String: Any], headers: [String: String]? = nil, callback: ((Result) -> ())? = nil) throws {
         if let replyAddress = self.basis["replyAddress"].string {
             try self.eventBus.send(to: replyAddress, body: body, headers: headers, callback: callback)
         }

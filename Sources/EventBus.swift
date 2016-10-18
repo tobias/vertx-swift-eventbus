@@ -38,7 +38,7 @@ public class EventBus {
 
     private var errorHandler: ((EventBusError) -> ())? = nil
     private var handlers = [String : [String : (Message) -> ()]]()
-    private var replyHandlers = [String: (Message) -> ()]()
+    private var replyHandlers = [String: (Result) -> ()]()
 
     private var open = false
 
@@ -105,7 +105,7 @@ public class EventBus {
                 workQueue.async(execute: { handler(msg) })
             }
         } else if let h = self.replyHandlers[address] {
-            workQueue.async(execute: { h(msg) })
+            workQueue.async(execute: { h(Result(msg)) })
         }
     }
 
@@ -132,13 +132,13 @@ public class EventBus {
     public func send(to address: String,
                      body: [String: Any],
                      headers: [String: String]? = nil,
-                     callback: ((Message) -> ())? = nil) throws {
+                     callback: ((Result) -> ())? = nil) throws {
         var msg: [String: Any] = ["type": "send", "address": address, "body": body, "headers": headers ?? [String: String]()]
 
         if let cb = callback {
             let replyAddress = uuid()
-            replyHandlers[replyAddress] = {[unowned self] (m) in
-                cb(m)
+            replyHandlers[replyAddress] = {[unowned self] (r) in
+                cb(r)
                 self.replyHandlers[replyAddress] = nil
             }
 

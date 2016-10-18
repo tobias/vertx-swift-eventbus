@@ -59,128 +59,134 @@ class EventBusTests: XCTestCase {
     }
 
     func testRegister() throws {
-        var receivedMsgs = [Message]()
+        var results = [Message]()
 
-        let _ = try self.eb!.register(address: "test.time") { msg in
-            receivedMsgs.append(msg)
+        let _ = try self.eb!.register(address: "test.time") { res in
+            results.append(res)
         }
         wait(s: 2)
-        XCTAssert(!receivedMsgs.isEmpty)
-        if let msg = receivedMsgs.first {
-            XCTAssert(msg.body["now"] != nil)
+        XCTAssert(!results.isEmpty)
+        if let res = results.first {
+            XCTAssert(res.body["now"] != nil)
         }
 
     }
 
     func testRemoteReply() throws {
-        var receivedMsgs = [Message]()
+        var results = [Result]()
 
         try self.eb!.send(to: "test.echo", body: ["foo": "bar"], callback: { m in
-                              receivedMsgs.append(m)
+                              results.append(m)
                           })
         wait(s: 2)
-        XCTAssert(!receivedMsgs.isEmpty)
-        if let msg = receivedMsgs.first {
+        XCTAssert(!results.isEmpty)
+        if let res = results.first,
+           let msg = res.message {
             XCTAssert(msg.body["original-body"]["foo"] == "bar")
         }
     }
 
     func testLocalReply() throws {
-        var receivedMsgs = [Message]()
+        var results = [Result]()
 
         try self.eb!.send(to: "test.ping-pong", body: ["counter": 0],
                           callback: { m in
-                              receivedMsgs.append(m)
-                              let count = m.body["counter"].intValue
+                              results.append(m)
+                              XCTAssert(m.message != nil)
+                              let count = m.message!.body["counter"].intValue
                               print("ping-pong: count is \(count)")
                               do {
-                                  try m.reply(body: ["counter": count + 1],
-                                              callback: { m in
-                                                  do {
-                                                      receivedMsgs.append(m)
-                                                      let count = m.body["counter"].intValue
-                                                      print("ping-pong: count is \(count)")
-                                                      try m.reply(body: ["counter": count + 1],
-                                                                  callback: { m in
-                                                                      let count = m.body["counter"].intValue
-                                                                      print("ping-pong: count is \(count)")
-                                                                      receivedMsgs.append(m)
-                                                                      do {
-                                                                          try m.reply(["counter": count + 1])
-                                                                      } catch let error {
-                                                                          XCTFail(String(describing: error))
-                                                                      }
-                                                                  })
-                                                  } catch let error {
-                                                      XCTFail(String(describing: error))
-                                                  }
-                                              })
+                                  try m.message!
+                                    .reply(body: ["counter": count + 1],
+                                           callback: { m in
+                                               do {
+                                                   results.append(m)
+                                                   XCTAssert(m.message != nil)
+                                                   let count = m.message!.body["counter"].intValue
+                                                   print("ping-pong: count is \(count)")
+                                                   try m.message!
+                                                     .reply(body: ["counter": count + 1],
+                                                            callback: { m in
+                                                                XCTAssert(m.message != nil)
+                                                                let count = m.message!.body["counter"].intValue
+                                                                print("ping-pong: count is \(count)")
+                                                                results.append(m)
+                                                                do {
+                                                                    try m.message!.reply(["counter": count + 1])
+                                                                } catch let error {
+                                                                    XCTFail(String(describing: error))
+                                                                }
+                                                            })
+                                               } catch let error {
+                                                   XCTFail(String(describing: error))
+                                               }
+                                           })
                               } catch let error {
                                   XCTFail(String(describing: error))
                               }
                           })
         wait(s: 2)
-        XCTAssert(receivedMsgs.count == 3)
-        for (idx, msg) in receivedMsgs.enumerated() {
-            XCTAssert(msg.body["counter"].intValue == idx * 2 + 1)
+        XCTAssert(results.count == 3)
+        for (idx, res) in results.enumerated() {
+            XCTAssert(res.message!.body["counter"].intValue == idx * 2 + 1)
         }
     }
 
     func testSend() throws {
-        var receivedMsgs = [Message]()
+        var results = [Message]()
 
-        let _ = try self.eb!.register(address: "test.echo.responses") { msg in
-            receivedMsgs.append(msg)
+        let _ = try self.eb!.register(address: "test.echo.responses") { res in
+            results.append(res)
         }
         try self.eb!.send(to: "test.echo", body: ["foo": "bar"])
         wait(s: 2)
-        XCTAssert(!receivedMsgs.isEmpty)
-        if let msg = receivedMsgs.first {
-            XCTAssert(msg.body["original-body"]["foo"] == "bar")
+        XCTAssert(!results.isEmpty)
+        if let res = results.first {
+            XCTAssert(res.body["original-body"]["foo"] == "bar")
         }
     }
 
     func testSendWithHeaders() throws {
-        var receivedMsgs = [Message]()
+        var results = [Message]()
 
-        let _ = try self.eb!.register(address: "test.echo.responses") { msg in
-            receivedMsgs.append(msg)
+        let _ = try self.eb!.register(address: "test.echo.responses") { res in
+            results.append(res)
         }
         try self.eb!.send(to: "test.echo", body: ["foo": "bar"], headers: ["ham": "biscuit"])
         wait(s: 2)
-        XCTAssert(!receivedMsgs.isEmpty)
-        if let msg = receivedMsgs.first {
-            XCTAssert(msg.body["original-body"]["foo"] == "bar")
-            XCTAssert(msg.body["original-headers"]["ham"] == "biscuit")
+        XCTAssert(!results.isEmpty)
+        if let res = results.first {
+            XCTAssert(res.body["original-body"]["foo"] == "bar")
+            XCTAssert(res.body["original-headers"]["ham"] == "biscuit")
         }
     }
 
     func testPublish() throws {
-        var receivedMsgs = [Message]()
+        var results = [Message]()
 
-        let _ = try self.eb!.register(address: "test.echo.responses") { msg in
-            receivedMsgs.append(msg)
+        let _ = try self.eb!.register(address: "test.echo.responses") { res in
+            results.append(res)
         }
         try self.eb!.publish(to: "test.echo", body: ["foo": "bar"])
         wait(s: 2)
-        XCTAssert(!receivedMsgs.isEmpty)
-        if let msg = receivedMsgs.first {
-            XCTAssert(msg.body["original-body"]["foo"] == "bar")
+        XCTAssert(!results.isEmpty)
+        if let res = results.first {
+            XCTAssert(res.body["original-body"]["foo"] == "bar")
         }
     }
 
     func testPublishWithHeaders() throws {
-        var receivedMsgs = [Message]()
+        var results = [Message]()
 
-        let _ = try self.eb!.register(address: "test.echo.responses") { msg in
-            receivedMsgs.append(msg)
+        let _ = try self.eb!.register(address: "test.echo.responses") { res in
+            results.append(res)
         }
         try self.eb!.publish(to: "test.echo", body: ["foo": "bar"], headers: ["ham": "biscuit"])
         wait(s: 2)
-        XCTAssert(!receivedMsgs.isEmpty)
-        if let msg = receivedMsgs.first {
-            XCTAssert(msg.body["original-body"]["foo"] == "bar")
-            XCTAssert(msg.body["original-headers"]["ham"] == "biscuit")
+        XCTAssert(!results.isEmpty)
+        if let res = results.first {
+            XCTAssert(res.body["original-body"]["foo"] == "bar")
+            XCTAssert(res.body["original-headers"]["ham"] == "biscuit")
         }
     }
 

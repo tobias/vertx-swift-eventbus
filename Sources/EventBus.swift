@@ -36,7 +36,7 @@ public class EventBus {
         
     private var errorHandler: ((EventBusError) -> ())? = nil
     private var handlers = [String : [String : (Message) -> ()]]()
-    private var replyHandlers = [String: (Result) -> ()]()
+    private var replyHandlers = [String: (Response) -> ()]()
     private let replyHandlersMutex = Mutex(recursive: true)
     
     func readLoop() {
@@ -62,7 +62,7 @@ public class EventBus {
 
     func readMessage() {
         guard let socket = self.socket else {
-            handleError(DisconnectedError())
+            handleError(EventBusError.disconnected(cause: nil))
 
             return
         }
@@ -72,7 +72,7 @@ public class EventBus {
             }
         } catch let error {
             disconnect()
-            handleError(DisconnectedError(cause: error))
+            handleError(EventBusError.disconnected(cause: error))
         }
     }
 
@@ -86,7 +86,7 @@ public class EventBus {
         guard let address = json["address"].string else {
             if let type = json["type"].string,
                type == "err" {
-                handleError(ProtocolError.serverError(message: json["message"].string!))
+                handleError(EventBusError.serverError(message: json["message"].string!))
             }
             
             // ignore unknown messages
@@ -100,13 +100,13 @@ public class EventBus {
                 workQueue.async(execute: { handler(msg) })
             }
         } else if let h = self.replyHandlers[address] {
-            workQueue.async(execute: { h(Result(msg)) })
+            workQueue.async(execute: { h(Response(message: msg)) })
         }
     }
 
     func send(_ message: JSON) throws {
         guard let m = message.rawString() else {
-            throw ProtocolError.invalidData(data: message)
+            throw EventBusError.invalidData(data: message)
         }
         
         try send(m)
@@ -114,13 +114,13 @@ public class EventBus {
 
     func send(_ message: String) throws {
         guard let socket = self.socket else {
-            throw DisconnectedError()
+            throw EventBusError.disconnected(cause: nil)
         }
         do {
             try Util.write(from: message, to: socket)
         } catch let error {
             disconnect()
-            throw DisconnectedError(cause: error)
+            throw EventBusError.disconnected(cause: error)
         }
     }
 
@@ -128,7 +128,7 @@ public class EventBus {
         do {
             try send(JSON(["type": "ping"]))
         } catch let error {
-            if let e = error as? DisconnectedError {
+            if let e = error as? EventBusError {
                 handleError(e)
             }
             // else won't happen
@@ -175,7 +175,7 @@ public class EventBus {
                      body: [String: Any],
                      headers: [String: String]? = nil,
                      replyTimeout: Int = 30000, // 30 seconds
-                     callback: ((Result) -> ())? = nil) throws {
+                     callback: ((Response) -> ())? = nil) throws {
         var msg: [String: Any] = ["type": "send", "address": address, "body": body, "headers": headers ?? [String: String]()]
 
         if let cb = callback {
@@ -186,7 +186,7 @@ public class EventBus {
                     self.replyHandlersMutex.unlock()
                 }
                 if let _ = self.replyHandlers.removeValue(forKey: replyAddress) {
-                    cb(Result(TimeoutError()))
+                    cb(Response.timeout())
                 }
             }
   

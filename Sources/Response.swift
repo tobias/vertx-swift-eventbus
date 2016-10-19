@@ -14,23 +14,19 @@
  * limitations under the License.
  **/
 
-public struct Result {
-    public let successful: Bool
-    public let error: EventBusError?
+public struct Response {
     public let message: Message?
+    public var timedOut: Bool {
+        if let _ = self.message {
 
-    init(successful: Bool, error: EventBusError?, message: Message?) {
-        self.successful = successful
-        self.error = error
-        self.message = message
+            return false
+        }
+
+        return true
     }
 
-    public init(_ error: EventBusError) {
-        self.init(successful: false, error: error, message: nil)
-    }
-
-    public init(_ message: Message) {
-        self.init(successful: true, error: nil, message: message)
+    static func timeout() -> Response {
+        return Response(message: nil)
     }
 }
 

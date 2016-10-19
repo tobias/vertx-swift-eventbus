@@ -76,7 +76,7 @@ class EventBusTests: XCTestCase {
     }
 
     func testRemoteReply() throws {
-        var results = [Result]()
+        var results = [Response]()
 
         try self.eb!.send(to: "test.echo", body: ["foo": "bar"], callback: { m in
                               results.append(m)
@@ -90,7 +90,7 @@ class EventBusTests: XCTestCase {
     }
 
     func testLocalReply() throws {
-        var results = [Result]()
+        var results = [Response]()
 
         try self.eb!.send(to: "test.ping-pong", body: ["counter": 0],
                           callback: { m in
@@ -150,28 +150,23 @@ class EventBusTests: XCTestCase {
     }
 
     func testTimeoutOnSendReply() throws {
-        var result: Result?
+        var result: Response?
         try self.eb!.send(to: "test.non-exist", body: ["what": "ever"], replyTimeout: 1) { result = $0 }
         wait(s: 2)
         guard let r = result else {
-            XCTFail("Result is nil")
+            XCTFail("Response is nil")
             return
         }
-        XCTAssert(!r.successful)
-        guard let e = r.error else {
-            XCTFail("Error is nil")
-            return
-        }
-        XCTAssert(e is TimeoutError)
+        XCTAssert(r.timedOut)
     }
 
     func testReplyBeatsTimeoutOnSend() throws {
-        var results = [Result]()
+        var results = [Response]()
         try self.eb!.send(to: "test.echo", body: ["what": "ever"], replyTimeout: 1000) { results.append($0) }
         wait(s: 2)
         XCTAssert(results.count == 1)
         if let res = results.first {
-            XCTAssert(res.successful)
+            XCTAssert(!res.timedOut)
             guard let msg = res.message else {
                 XCTFail("message is missing from successful result")
                 return

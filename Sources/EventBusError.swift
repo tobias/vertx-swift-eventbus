@@ -16,20 +16,9 @@
 
 import SwiftyJSON
 
-public protocol EventBusError : Error {}
-
-public enum ProtocolError: EventBusError {
+public enum EventBusError : Error {
     case invalidData(data: JSON)
     case serverError(message: String)
-    case unknownError(error: Error)
+    case disconnected(cause: Error?)
 }
 
-public class DisconnectedError: EventBusError {
-    public let cause: Error?
-    
-    init(cause: Error? = nil) {
-        self.cause = cause
-    }
-}
-
-public class TimeoutError: EventBusError {}

@@ -33,7 +33,8 @@ public class EventBus {
     private var errorHandler: ((ProtocolError) -> ())? = nil
     private var handlers = [String : [String : (Message) -> ()]]()
     private var replyHandlers = [String: (Result) -> ()]()
-
+    private let replyHandlersMutex = Mutex(recursive: true)
+    
     private var open = false
 
     func readLoop() {
@@ -134,20 +135,32 @@ public class EventBus {
 
         if let cb = callback {
             let replyAddress = uuid()
+            let timeoutAction = DispatchWorkItem() {
+                self.replyHandlersMutex.lock()
+                defer {
+                    self.replyHandlersMutex.unlock()
+                }
+                if let _ = self.replyHandlers.removeValue(forKey: replyAddress) {
+                    cb(Result(TimeoutError()))
+                }
+            }
+  
             replyHandlers[replyAddress] = {[unowned self] (r) in
-                cb(r)
-                self.replyHandlers[replyAddress] = nil
+                self.replyHandlersMutex.lock()
+                defer {
+                    self.replyHandlersMutex.unlock()
+                }
+                if let _ = self.replyHandlers.removeValue(forKey: replyAddress) {
+                    timeoutAction.cancel()
+                    cb(r)
+                }
             }
 
             msg["replyAddress"] = replyAddress
-
+                
             DispatchQueue.global()
               .asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(replyTimeout),
-                          execute: {
-                              if let cb = self.replyHandlers[replyAddress] {
-                                  cb(Result(TimeoutError()))
-                              }
-                          })
+                          execute: timeoutAction)
         }
         
         try send(JSON(msg))

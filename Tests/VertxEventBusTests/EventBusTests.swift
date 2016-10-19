@@ -28,6 +28,7 @@ class EventBusTests: XCTestCase {
                 ("testLocalReply", testLocalReply),
                 ("testSend", testSend),
                 ("testTimeoutOnSendReply", testTimeoutOnSendReply),
+                ("testReplyBeatsTimeoutOnSend", testReplyBeatsTimeoutOnSend),
                 ("testSendWithHeaders", testSendWithHeaders),
                 ("testPublish", testPublish),
                 ("testPublishWithHeaders", testPublishWithHeaders),
@@ -151,11 +152,33 @@ class EventBusTests: XCTestCase {
         var result: Result?
         try self.eb!.send(to: "test.non-exist", body: ["what": "ever"], replyTimeout: 1) { result = $0 }
         wait(s: 2)
-        XCTAssert(result != nil)
-        XCTAssert(result!.error != nil)
-        XCTAssert(result!.error! is TimeoutError)
+        guard let r = result else {
+            XCTFail("Result is nil")
+            return
+        }
+        XCTAssert(!r.successful)
+        guard let e = r.error else {
+            XCTFail("Error is nil")
+            return
+        }
+        XCTAssert(e is TimeoutError)
     }
-    
+
+    func testReplyBeatsTimeoutOnSend() throws {
+        var results = [Result]()
+        try self.eb!.send(to: "test.echo", body: ["what": "ever"], replyTimeout: 1000) { results.append($0) }
+        wait(s: 2)
+        XCTAssert(results.count == 1)
+        if let res = results.first {
+            XCTAssert(res.successful)
+            guard let msg = res.message else {
+                XCTFail("message is missing from successful result")
+                return
+            }
+            XCTAssert(msg.body["original-body"]["what"] == "ever")
+        }
+    }
+
     func testSendWithHeaders() throws {
         var results = [Message]()
 

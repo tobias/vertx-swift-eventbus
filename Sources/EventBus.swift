@@ -19,11 +19,6 @@ import Foundation
 import Socket
 import SwiftyJSON
 
-// TODO: check to make sure the socket is still open
-// TODO: reconnect?
-// TODO: error handler
-// TODO: handle replies
-
 public class EventBus {
     private let host: String
     private let port: Int32
@@ -221,7 +216,10 @@ public class EventBus {
     }
 
     // returns an id to use when unregistering
-    public func register(address: String, id: String? = nil, handler: @escaping ((Message) -> ())) throws -> String {
+    public func register(address: String,
+                         id: String? = nil,
+                         headers: [String: String]? = nil,
+                         handler: @escaping ((Message) -> ())) throws -> String {
         let _id = id ?? uuid()
         if let _ = self.handlers[address] {
             self.handlers[address]![_id] = handler
@@ -229,13 +227,13 @@ public class EventBus {
             self.handlers[address] = [_id : handler]
         }
 
-        try send(JSON(["type": "register", "address": address])) //TODO: headers
+        try send(JSON(["type": "register", "address": address, "headers": headers ?? [String: String]()])) 
 
         return _id
     }
 
     // returns true if something was actually unregistered
-    public func unregister(address: String, id: String) throws -> Bool {
+    public func unregister(address: String, id: String, headers: [String: String]? = nil) throws -> Bool {
         guard var handlers = self.handlers[address],
               let _ = handlers[id] else {
 
@@ -245,7 +243,7 @@ public class EventBus {
         handlers.removeValue(forKey: id)
 
         if handlers.isEmpty {
-            try send(JSON(["type": "unregister", "address": address])) //TODO: headers
+            try send(JSON(["type": "unregister", "address": address, "headers": headers ?? [String: String]()]))
         }
 
         return true

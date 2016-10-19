@@ -39,7 +39,8 @@ class EventBusTests: XCTestCase {
     override func setUp() {
         super.setUp()
         do {
-            self.eb = try EventBus(host: "localhost", port: 7001)
+            self.eb = EventBus(host: "localhost", port: 7001)
+            try self.eb!.connect()
         } catch let error {
             print("Failed to open eventbus: \(error)")
         }
@@ -47,7 +48,7 @@ class EventBusTests: XCTestCase {
 
     override func tearDown() {
         if let eb = self.eb {
-            eb.close()
+            eb.disconnect()
         }
         super.tearDown()
     }

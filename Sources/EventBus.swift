@@ -25,20 +25,22 @@ import SwiftyJSON
 // TODO: handle replies
 
 public class EventBus {
-    private let socket: Socket
-
+    private let host: String
+    private let port: Int32
+    private let pingInterval: Int
+    
     private let readQueue = DispatchQueue(label: "read")
     private let workQueue = DispatchQueue(label: "work", attributes: [.concurrent])
 
-    private var errorHandler: ((ProtocolError) -> ())? = nil
+    private var socket: Socket?
+        
+    private var errorHandler: ((EventBusError) -> ())? = nil
     private var handlers = [String : [String : (Message) -> ()]]()
     private var replyHandlers = [String: (Result) -> ()]()
     private let replyHandlersMutex = Mutex(recursive: true)
     
-    private var open = false
-
     func readLoop() {
-        if self.open {
+        if connected() {
             readQueue.async(execute: {
                                 self.readMessage()
                                 self.readLoop()
@@ -46,28 +48,35 @@ public class EventBus {
         }
     }
 
-    func pingLoop(every: Int) {
-        if self.open {
+    func pingLoop() {
+        if connected() {
             DispatchQueue.global()
-              .asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.milliseconds(every),
+              .asyncAfter(deadline: DispatchTime.now()
+                            + DispatchTimeInterval.milliseconds(self.pingInterval),
                           execute: {
                               self.ping()
-                              self.pingLoop(every: every)
+                              self.pingLoop()
                           })
         }
     }
 
     func readMessage() {
+        guard let socket = self.socket else {
+            handleError(DisconnectedError())
+
+            return
+        }
         do {
-            if let msg = try Util.read(from: self.socket) {
+            if let msg = try Util.read(from: socket) {
                 dispatch(msg)
             }
         } catch let error {
-            handleError(ProtocolError.unknownError(error: error))
+            disconnect()
+            handleError(DisconnectedError(cause: error))
         }
     }
 
-    func handleError(_ error: ProtocolError) {
+    func handleError(_ error: EventBusError) {
         if let h = self.errorHandler {
             h(error)
         }
@@ -78,10 +87,10 @@ public class EventBus {
             if let type = json["type"].string,
                type == "err" {
                 handleError(ProtocolError.serverError(message: json["message"].string!))
-            } else {
-                handleError(ProtocolError.unknownMessage(message: json))
             }
-
+            
+            // ignore unknown messages
+            
             return
         }
 
@@ -96,18 +105,33 @@ public class EventBus {
     }
 
     func send(_ message: JSON) throws {
-        try Util.write(from: message, to: self.socket)
+        guard let m = message.rawString() else {
+            throw ProtocolError.invalidData(data: message)
+        }
+        
+        try send(m)
     }
 
     func send(_ message: String) throws {
-        try Util.write(from: message, to: self.socket)
+        guard let socket = self.socket else {
+            throw DisconnectedError()
+        }
+        do {
+            try Util.write(from: message, to: socket)
+        } catch let error {
+            disconnect()
+            throw DisconnectedError(cause: error)
+        }
     }
 
     func ping() {
         do {
             try send(JSON(["type": "ping"]))
         } catch let error {
-            handleError(ProtocolError.unknownError(error: error))
+            if let e = error as? DisconnectedError {
+                handleError(e)
+            }
+            // else won't happen
         }
     }
 
@@ -117,15 +141,36 @@ public class EventBus {
 
     // public API
 
-    public init(host: String, port: Int, pingEvery: Int = 5000) throws {
-        self.socket = try Socket.create()
-        try self.socket.connect(to: host, port: Int32(port))
-        self.open = true
-        readLoop()
-        ping() // ping once to get this party started
-        pingLoop(every: pingEvery)
+    public init(host: String, port: Int, pingEvery: Int = 5000) {
+        self.host = host
+        self.port = Int32(port)
+        self.pingInterval = pingEvery
     }
 
+    public func connect() throws {
+        self.socket = try Socket.create()
+        try self.socket!.connect(to: self.host, port: self.port)
+        readLoop()
+        ping() // ping once to get this party started
+        pingLoop()
+    }
+
+    public func disconnect() {
+        if let s = self.socket {
+            s.close()
+            self.socket = nil
+        }
+    }
+
+    public func connected() -> Bool {
+        if let _ = self.socket {
+            
+            return true
+        }
+
+        return false
+    }
+    
     public func send(to address: String,
                      body: [String: Any],
                      headers: [String: String]? = nil,
@@ -206,16 +251,7 @@ public class EventBus {
         return true
     }
 
-    public func register(errorHandler: @escaping (ProtocolError) -> ()) {
+    public func register(errorHandler: @escaping (EventBusError) -> ()) {
         self.errorHandler = errorHandler
     }
-
-
-    public func close() {
-        if self.open {
-            self.socket.close()
-            self.open = false
-        }
-    }
-
 }

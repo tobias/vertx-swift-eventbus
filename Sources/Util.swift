@@ -42,15 +42,6 @@ public class Util {
         return bytes
     }
 
-    public class func write(from: JSON, to: Socket) throws {
-        guard let m = from.rawString() else {
-            // TODO: throw
-            return
-        }
-                    
-        try write(from: m, to: to)
-    }
-    
     public class func write(from: String, to sock: Socket) throws {
         //print("TC: out - \(from)")
         var data = [UInt8]()

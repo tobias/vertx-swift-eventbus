@@ -25,9 +25,9 @@ public class Mutex {
 	pthread_mutexattr_init(&attr)
 
 	if recursive {
-            pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE)
+            pthread_mutexattr_settype(&attr, Int32(PTHREAD_MUTEX_RECURSIVE))
         } else {
-	    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL)
+	    pthread_mutexattr_settype(&attr, Int32(PTHREAD_MUTEX_NORMAL))
         }
     }
 

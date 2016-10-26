@@ -115,7 +115,7 @@ class EventBusTests: XCTestCase {
                                                                 print("ping-pong: count is \(count)")
                                                                 results.append(m)
                                                                 do {
-                                                                    try m.message!.reply(["counter": count + 1])
+                                                                    try m.message!.reply(body: ["counter": count + 1])
                                                                 } catch let error {
                                                                     XCTFail(String(describing: error))
                                                                 }

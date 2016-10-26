@@ -37,14 +37,6 @@ public class Message {
 
     /// Sends back a reply to this message
     ///
-    /// - throws: `EventBusError.invalidData(data:)` if the given `body` can't be converted to JSON
-    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge
-    public func reply(_ body: [String: Any]) throws {
-        try reply(body: body)
-    }
-
-    /// Sends back a reply to this message
-    ///
     /// - parameters:
     ///   - <#body#>: the content of the message
     ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)

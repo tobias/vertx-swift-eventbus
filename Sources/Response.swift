@@ -14,8 +14,16 @@
  * limitations under the License.
  **/
 
+/// Represents the response for a reply.
 public struct Response {
+    /// The message for the reply.
+    ///
+    /// Will be nil if `timedOut` is `true`
     public let message: Message?
+    
+    /// The timeout status of the reply.
+    ///
+    /// `message` will be nil if this is `true`.
     public var timedOut: Bool {
         if let _ = self.message {
 

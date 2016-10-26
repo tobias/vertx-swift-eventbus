@@ -16,27 +16,42 @@
 
 import SwiftyJSON
 
+/// Represents an EventBus message with metadata.
 public class Message {
     let basis: JSON
     let eventBus: EventBus
-    
-    public var body: JSON {
-        return basis["body"]
-    }
 
     var headers: [String: String] {
         return (basis["headers"].dictionaryObject as! [String: String]?) ?? [String: String]()
     }
-    
+
     init(basis: JSON, eventBus: EventBus) {
         self.basis = basis
         self.eventBus = eventBus
     }
 
+    /// The body (content) of the message.
+    public var body: JSON {
+        return basis["body"]
+    }
+
+    /// Sends back a reply to this message
+    ///
+    /// - throws: `EventBusError.invalidData(data:)` if the given `body` can't be converted to JSON
+    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge
     public func reply(_ body: [String: Any]) throws {
         try reply(body: body)
     }
-    
+
+    /// Sends back a reply to this message
+    ///
+    /// - parameters:
+    ///   - <#body#>: the content of the message
+    ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)
+    ///   - <#replyTimeout#>: the timeout (in ms) to wait for a reply if a reply callback is provided (default: `30000`)
+    ///   - <#callback#>: the callback to handle the reply or timeout `Response` (default: `nil`)
+    /// - throws: `EventBusError.invalidData(data:)` if the given `body` can't be converted to JSON
+    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge
     public func reply(body: [String: Any], headers: [String: String]? = nil, callback: ((Response) -> ())? = nil) throws {
         if let replyAddress = self.basis["replyAddress"].string {
             try self.eventBus.send(to: replyAddress, body: body, headers: headers, callback: callback)

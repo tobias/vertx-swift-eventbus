@@ -17,10 +17,10 @@
 import Foundation
 
 // convenience wrapper wround pthread_mutex_t
-public class Mutex {
+class Mutex {
     var mutex = pthread_mutex_t()
     
-    public init(recursive: Bool = false) {
+    init(recursive: Bool = false) {
         var attr = pthread_mutexattr_t()
 	pthread_mutexattr_init(&attr)
 
@@ -35,11 +35,11 @@ public class Mutex {
         pthread_mutex_destroy(&mutex)
     }
     
-    public func lock() {
+    func lock() {
         pthread_mutex_lock(&mutex)
     }
 
-    public func unlock() {
+    func unlock() {
         pthread_mutex_unlock(&mutex)
     }
     

@@ -18,8 +18,8 @@ import Foundation
 import Socket
 import SwiftyJSON
 
-public class Util {
-    public class func readInt32(_ value: NSData) -> Int32 {
+class Util {
+    class func readInt32(_ value: NSData) -> Int32 {
         var result: Int32 = 0
 
         let bytes = UnsafeBufferPointer<UInt8>(start: value.bytes.assumingMemoryBound(to: UInt8.self), count: 4)
@@ -30,7 +30,7 @@ public class Util {
         return result
     }
 
-    public class func intToBytes(_ value: Int32) -> [UInt8] {
+    class func intToBytes(_ value: Int32) -> [UInt8] {
         var bytes = [UInt8]()
 
         var x = 3
@@ -42,7 +42,7 @@ public class Util {
         return bytes
     }
 
-    public class func write(from: String, to sock: Socket) throws {
+    class func write(from: String, to sock: Socket) throws {
         //print("TC: out - \(from)")
         var data = [UInt8]()
 
@@ -52,7 +52,7 @@ public class Util {
         try sock.write(from: data, bufSize: data.count)
     }
 
-    public class func read(from: Socket) throws -> JSON? {
+    class func read(from: Socket) throws -> JSON? {
         let data = NSMutableData()
 
         let cnt = try from.read(into: data)

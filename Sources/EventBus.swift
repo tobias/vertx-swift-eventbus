@@ -19,6 +19,7 @@ import Foundation
 import Socket
 import SwiftyJSON
 
+/// Provides a connection to a remote [TCP EventBus Bridge](https://github.com/vert-x3/vertx-tcp-eventbus-bridge).
 public class EventBus {
     private let host: String
     private let port: Int32
@@ -136,12 +137,26 @@ public class EventBus {
 
     // public API
 
+    /// Creates a new EventBus instance.
+    ///
+    /// Note: a new EventBus instance *isn't* connected to the bridge automatically. See `connect()`.
+    ///
+    /// - parameters:
+    ///   - <#host#>: host running the bridge
+    ///   - <#port#>: port the bridge is listening on
+    ///   - <#pingEvery#>: interval (in ms) to ping the bridge to ensure it is still up (default: `5000`)
+    /// - returns: a new EventBus
     public init(host: String, port: Int, pingEvery: Int = 5000) {
         self.host = host
         self.port = Int32(port)
         self.pingInterval = pingEvery
     }
 
+    /// Connects to the remote bridge.
+    ///
+    /// Any already registered message handlers will be (re)connected.
+    ///
+    /// - throws: `Socket.Error` if connecting fails
     public func connect() throws {
         self.socket = try Socket.create()
         try self.socket!.connect(to: self.host, port: self.port)
@@ -150,6 +165,7 @@ public class EventBus {
         pingLoop()
     }
 
+    /// Disconnects from the remote bridge.
     public func disconnect() {
         if let s = self.socket {
             s.close()
@@ -157,6 +173,9 @@ public class EventBus {
         }
     }
 
+    /// Signals the current state of the connection.
+    ///
+    /// - returns: `true` if connected to the remote bridge, `false` otherwise
     public func connected() -> Bool {
         if let _ = self.socket {
             
@@ -165,7 +184,22 @@ public class EventBus {
 
         return false
     }
-    
+
+    /// Sends a message to an EventBus address.
+    ///
+    /// If the remote handler will reply, you can provide a callback
+    /// to handle that reply. If no reply is received within the
+    /// specified timeout, a `Response` that responds with `false` to
+    /// `timeout()` will be passed.
+    ///
+    /// - parameters:
+    ///   - <#to#>: the address to send the message to
+    ///   - <#body#>: the body of the message
+    ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)
+    ///   - <#replyTimeout#>: the timeout (in ms) to wait for a reply if a reply callback is provided (default: `30000`)
+    ///   - <#callback#>: the callback to handle the reply or timeout `Response` (default: `nil`)
+    /// - throws: `EventBusError.invalidData(data:)` if the given `body` can't be converted to JSON
+    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge
     public func send(to address: String,
                      body: [String: Any],
                      headers: [String: String]? = nil,
@@ -206,6 +240,14 @@ public class EventBus {
         try send(JSON(msg))
     }
 
+    /// Publishes a message to the EventBus.
+    ///
+    /// - parameters:
+    ///   - <#to#>: the address to send the message to
+    ///   - <#body#>: the body of the message
+    ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)
+    /// - throws: `EventBusError.invalidData(data:)` if the given `body` can't be converted to JSON
+    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge    
     public func publish(to address: String,
                         body: [String: Any],
                         headers: [String: String]? = nil) throws {
@@ -215,7 +257,15 @@ public class EventBus {
                        "headers": headers ?? [String: String]()] as [String: Any]))
     }
 
-    // returns an id to use when unregistering
+    /// Registers a closure to receive messages for the given address.
+    ///
+    /// - parameters:
+    ///   - <#address#>: the address to listen to
+    ///   - <#id#>: the id for the registration (default: a random uuid)
+    ///   - <#headers#>: headers to send with the register request (default: `[String: String]()`)
+    ///   - <#handler#>: the closure to handle each `Message`
+    /// - returns: an id for the registration that can be used to unregister it
+    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge    
     public func register(address: String,
                          id: String? = nil,
                          headers: [String: String]? = nil,
@@ -232,7 +282,14 @@ public class EventBus {
         return _id
     }
 
-    // returns true if something was actually unregistered
+    /// Registers a closure to receive messages for the given address.
+    ///
+    /// - parameters:
+    ///   - <#address#>: the address to remove the registration from
+    ///   - <#id#>: the id for the registration 
+    ///   - <#headers#>: headers to send with the unregister request (default: `[String: String]()`)
+    /// - returns: `true` if something was actually unregistered
+    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge
     public func unregister(address: String, id: String, headers: [String: String]? = nil) throws -> Bool {
         guard var handlers = self.handlers[address],
               let _ = handlers[id] else {
@@ -249,6 +306,14 @@ public class EventBus {
         return true
     }
 
+    /// Registers an error handler that will be passed any errors that occur in async operations.
+    ///
+    /// Operations that can trigger this error handler are:
+    /// - handling messages received from the remote bridge (can trigger `EventBusError.disconnected(cause:)` or `EventBusError.serverError(message:)`)
+    /// - the ping operation discovering the bridge connection has closed (can trigger `EventBusError.disconnected(cause:)`)
+    ///
+    /// - parameters:
+    ///   - <#errorHandler#>: a closure that will be passed an `EventBusError` when an error occurs
     public func register(errorHandler: @escaping (EventBusError) -> ()) {
         self.errorHandler = errorHandler
     }

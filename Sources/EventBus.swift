@@ -31,7 +31,7 @@ public class EventBus {
     private var socket: Socket?
         
     private var errorHandler: ((Error) -> ())? = nil
-    private var handlers = [String : [String : (Message) -> ()]]()
+    private var handlers = [String: [String: Registration]]()
     private var replyHandlers = [String: (Response) -> ()]()
     private let replyHandlersMutex = Mutex(recursive: true)
     
@@ -91,12 +91,12 @@ public class EventBus {
         }
 
         let msg = Message(basis: json, eventBus: self)
-        if let h = self.handlers[address] {
-            for handler in h.values {
-                workQueue.async(execute: { handler(msg) })
+        if let handlers = self.handlers[address] {
+            for registration in handlers.values {
+                workQueue.async(execute: { registration.handler(msg) })
             }
-        } else if let h = self.replyHandlers[address] {
-            workQueue.async(execute: { h(Response(message: msg)) })
+        } else if let handler = self.replyHandlers[address] {
+            workQueue.async(execute: { handler(Response(message: msg)) })
         }
     }
 
@@ -163,11 +163,30 @@ public class EventBus {
         readLoop()
         ping() // ping once to get this party started
         pingLoop()
+
+        for handlers in self.handlers.values {
+            for registration in handlers.values {
+                let _ = try register(address: registration.address,
+                                     id: registration.id,
+                                     headers: registration.headers,
+                                     handler: registration.handler)
+            }
+        }
     }
 
     /// Disconnects from the remote bridge.
     public func disconnect() {
         if let s = self.socket {
+            for handlers in self.handlers.values {
+                for registration in handlers.values {
+                    // We don't care about errors here, since we're
+                    // not going to be receiving messages anyway. We
+                    // unregister as a convenience to the bridge.
+                    let _ = try? unregister(address: registration.address,
+                                            id: registration.id,
+                                            headers: registration.headers)
+                }
+            }   
             s.close()
             self.socket = nil
         }
@@ -269,15 +288,17 @@ public class EventBus {
     public func register(address: String,
                          id: String? = nil,
                          headers: [String: String]? = nil,
-                         handler: @escaping ((Message) -> ())) throws -> String {
+                         handler: @escaping (Message) -> ()) throws -> String {
         let _id = id ?? uuid()
+        let _headers = headers ?? [String: String]()
+        let registration = Registration(address: address, id: _id, handler: handler, headers: _headers)
         if let _ = self.handlers[address] {
-            self.handlers[address]![_id] = handler
+            self.handlers[address]![_id] = registration
         } else {
-            self.handlers[address] = [_id : handler]
+            self.handlers[address] = [_id : registration]
         }
 
-        try send(JSON(["type": "register", "address": address, "headers": headers ?? [String: String]()])) 
+        try send(JSON(["type": "register", "address": address, "headers": _headers]))
 
         return _id
     }
@@ -318,9 +339,17 @@ public class EventBus {
         self.errorHandler = errorHandler
     }
 
+    // TODO: docs
     public enum Error : Swift.Error {
         case invalidData(data: JSON)
         case serverError(message: String)
         case disconnected(cause: Swift.Error?)
+    }
+
+    struct Registration {
+        let address: String
+        let id: String
+        let handler: (Message) -> ()
+        let headers: [String: String]
     }
 }

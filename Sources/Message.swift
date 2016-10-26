@@ -44,9 +44,12 @@ public class Message {
     ///   - <#callback#>: the callback to handle the reply or timeout `Response` (default: `nil`)
     /// - throws: `EventBusError.invalidData(data:)` if the given `body` can't be converted to JSON
     /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge
-    public func reply(body: [String: Any], headers: [String: String]? = nil, callback: ((Response) -> ())? = nil) throws {
+    public func reply(body: [String: Any],
+                      headers: [String: String]? = nil,
+                      replyTimeout: Int = 30000, // 30 seconds
+                      callback: ((Response) -> ())? = nil) throws {
         if let replyAddress = self.basis["replyAddress"].string {
-            try self.eventBus.send(to: replyAddress, body: body, headers: headers, callback: callback)
+            try self.eventBus.send(to: replyAddress, body: body, headers: headers, replyTimeout: replyTimeout, callback: callback)
         }
 
     }

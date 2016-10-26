@@ -30,7 +30,7 @@ public class EventBus {
 
     private var socket: Socket?
         
-    private var errorHandler: ((EventBusError) -> ())? = nil
+    private var errorHandler: ((Error) -> ())? = nil
     private var handlers = [String : [String : (Message) -> ()]]()
     private var replyHandlers = [String: (Response) -> ()]()
     private let replyHandlersMutex = Mutex(recursive: true)
@@ -58,7 +58,7 @@ public class EventBus {
 
     func readMessage() {
         guard let socket = self.socket else {
-            handleError(EventBusError.disconnected(cause: nil))
+            handleError(Error.disconnected(cause: nil))
 
             return
         }
@@ -68,11 +68,11 @@ public class EventBus {
             }
         } catch let error {
             disconnect()
-            handleError(EventBusError.disconnected(cause: error))
+            handleError(Error.disconnected(cause: error))
         }
     }
 
-    func handleError(_ error: EventBusError) {
+    func handleError(_ error: Error) {
         if let h = self.errorHandler {
             h(error)
         }
@@ -82,7 +82,7 @@ public class EventBus {
         guard let address = json["address"].string else {
             if let type = json["type"].string,
                type == "err" {
-                handleError(EventBusError.serverError(message: json["message"].string!))
+                handleError(Error.serverError(message: json["message"].string!))
             }
             
             // ignore unknown messages
@@ -102,7 +102,7 @@ public class EventBus {
 
     func send(_ message: JSON) throws {
         guard let m = message.rawString() else {
-            throw EventBusError.invalidData(data: message)
+            throw Error.invalidData(data: message)
         }
         
         try send(m)
@@ -110,13 +110,13 @@ public class EventBus {
 
     func send(_ message: String) throws {
         guard let socket = self.socket else {
-            throw EventBusError.disconnected(cause: nil)
+            throw Error.disconnected(cause: nil)
         }
         do {
             try Util.write(from: message, to: socket)
         } catch let error {
             disconnect()
-            throw EventBusError.disconnected(cause: error)
+            throw Error.disconnected(cause: error)
         }
     }
 
@@ -124,7 +124,7 @@ public class EventBus {
         do {
             try send(JSON(["type": "ping"]))
         } catch let error {
-            if let e = error as? EventBusError {
+            if let e = error as? Error {
                 handleError(e)
             }
             // else won't happen
@@ -198,8 +198,8 @@ public class EventBus {
     ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)
     ///   - <#replyTimeout#>: the timeout (in ms) to wait for a reply if a reply callback is provided (default: `30000`)
     ///   - <#callback#>: the callback to handle the reply or timeout `Response` (default: `nil`)
-    /// - throws: `EventBusError.invalidData(data:)` if the given `body` can't be converted to JSON
-    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge
+    /// - throws: `Error.invalidData(data:)` if the given `body` can't be converted to JSON
+    /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge
     public func send(to address: String,
                      body: [String: Any],
                      headers: [String: String]? = nil,
@@ -246,8 +246,8 @@ public class EventBus {
     ///   - <#to#>: the address to send the message to
     ///   - <#body#>: the body of the message
     ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)
-    /// - throws: `EventBusError.invalidData(data:)` if the given `body` can't be converted to JSON
-    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge    
+    /// - throws: `Error.invalidData(data:)` if the given `body` can't be converted to JSON
+    /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge    
     public func publish(to address: String,
                         body: [String: Any],
                         headers: [String: String]? = nil) throws {
@@ -265,7 +265,7 @@ public class EventBus {
     ///   - <#headers#>: headers to send with the register request (default: `[String: String]()`)
     ///   - <#handler#>: the closure to handle each `Message`
     /// - returns: an id for the registration that can be used to unregister it
-    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge    
+    /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge    
     public func register(address: String,
                          id: String? = nil,
                          headers: [String: String]? = nil,
@@ -289,7 +289,7 @@ public class EventBus {
     ///   - <#id#>: the id for the registration 
     ///   - <#headers#>: headers to send with the unregister request (default: `[String: String]()`)
     /// - returns: `true` if something was actually unregistered
-    /// - throws: `EventBusError.disconnected(cause:)` if not connected to the remote bridge
+    /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge
     public func unregister(address: String, id: String, headers: [String: String]? = nil) throws -> Bool {
         guard var handlers = self.handlers[address],
               let _ = handlers[id] else {
@@ -309,12 +309,18 @@ public class EventBus {
     /// Registers an error handler that will be passed any errors that occur in async operations.
     ///
     /// Operations that can trigger this error handler are:
-    /// - handling messages received from the remote bridge (can trigger `EventBusError.disconnected(cause:)` or `EventBusError.serverError(message:)`)
-    /// - the ping operation discovering the bridge connection has closed (can trigger `EventBusError.disconnected(cause:)`)
+    /// - handling messages received from the remote bridge (can trigger `Error.disconnected(cause:)` or `Error.serverError(message:)`)
+    /// - the ping operation discovering the bridge connection has closed (can trigger `Error.disconnected(cause:)`)
     ///
     /// - parameters:
-    ///   - <#errorHandler#>: a closure that will be passed an `EventBusError` when an error occurs
-    public func register(errorHandler: @escaping (EventBusError) -> ()) {
+    ///   - <#errorHandler#>: a closure that will be passed an `Error` when an error occurs
+    public func register(errorHandler: @escaping (Error) -> ()) {
         self.errorHandler = errorHandler
+    }
+
+    public enum Error : Swift.Error {
+        case invalidData(data: JSON)
+        case serverError(message: String)
+        case disconnected(cause: Swift.Error?)
     }
 }

@@ -92,8 +92,14 @@ public class EventBus {
 
         let msg = Message(basis: json, eventBus: self)
         if let handlers = self.handlers[address] {
-            for registration in handlers.values {
-                workQueue.async(execute: { registration.handler(msg) })
+            if (msg.isSend) {
+                if let registration = handlers.values.first {
+                    workQueue.async(execute: { registration.handler(msg) })
+                }
+            } else {
+                for registration in handlers.values {
+                    workQueue.async(execute: { registration.handler(msg) })
+                }
             }
         } else if let handler = self.replyHandlers[address] {
             workQueue.async(execute: { handler(Response(message: msg)) })

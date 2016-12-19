@@ -58,6 +58,7 @@ public class Main {
             vertx.setPeriodic(100, timer -> {
                 //System.out.println("Sending the time...");
                 eb.publish("test.time", new JsonObject().put("now", System.currentTimeMillis()));
+                eb.send("test.time-send", new JsonObject().put("now", System.currentTimeMillis()));
             });
 
             vertx.eventBus().consumer("test.echo",  m -> {
@@ -70,8 +71,13 @@ public class Main {
                         .put("original-headers", headers);
                 //System.out.println("REPLY: " + m.headers() + " | " + reply);
                 m.reply(reply);
-                // send a copy to another address as well to test non-replyable messages
-                eb.publish("test.echo.responses", reply);
+                // send a copy to another address as well to test
+                // non-replyable messages
+                if (m.isSend()) {
+                    eb.send("test.echo.responses", reply);
+                } else {
+                    eb.publish("test.echo.responses", reply);
+                }
             });
 
             vertx.eventBus().consumer("test.ping-pong", Main::pingPong);

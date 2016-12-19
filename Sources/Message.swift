@@ -35,6 +35,16 @@ public class Message {
         return basis["body"]
     }
 
+    /// True if this message was the result of a send (vs. publish)
+    public var isSend: Bool {
+        if let s = basis["send"].bool {
+
+            return s
+        }
+
+        return false
+    }
+    
     /// Sends back a reply to this message
     ///
     /// - parameters:

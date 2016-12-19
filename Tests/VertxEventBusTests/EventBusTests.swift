@@ -27,12 +27,13 @@ class EventBusTests: XCTestCase {
                 ("testRemoteReply", testRemoteReply),
                 ("testLocalReply", testLocalReply),
                 ("testSend", testSend),
+                ("testSendDeliversToOneHandler", testSendDeliversToOneHandler),
                 ("testTimeoutOnSendReply", testTimeoutOnSendReply),
                 ("testReplyBeatsTimeoutOnSend", testReplyBeatsTimeoutOnSend),
                 ("testSendWithHeaders", testSendWithHeaders),
                 ("testPublish", testPublish),
-                ("testPublishWithHeaders", testPublishWithHeaders),
-                ("testErrorOnSend", testErrorOnSend)]}
+                ("testPublishDeliversToAllHandlers", testPublishDeliversToAllHandlers),
+                ("testPublishWithHeaders", testPublishWithHeaders)]}
 
     var eb: EventBus? = nil
 
@@ -149,6 +150,21 @@ class EventBusTests: XCTestCase {
         }
     }
 
+    func testSendDeliversToOneHandler() throws {
+        var results = [Message]()
+
+        let handler = { res in
+            results.append(res)
+        }
+        
+        let _ = try self.eb!.register(address: "test.echo.responses", handler: handler)
+        
+        try self.eb!.send(to: "test.echo", body: ["foo": "bar"])
+        wait(s: 2)
+        XCTAssert(!results.isEmpty)
+        XCTAssert(results.count == 1)
+    }
+
     func testTimeoutOnSendReply() throws {
         var result: Response?
         try self.eb!.send(to: "test.non-exist", body: ["what": "ever"], replyTimeout: 1) { result = $0 }
@@ -204,6 +220,21 @@ class EventBusTests: XCTestCase {
         }
     }
 
+    func testPublishDeliversToAllHandlers() throws {
+        var results = [Message]()
+
+        let handler = { res in
+            results.append(res)
+        }
+
+        let _ = try self.eb!.register(address: "test.echo.responses", handler: handler)
+        let _ = try self.eb!.register(address: "test.echo.responses", handler: handler)
+        try self.eb!.publish(to: "test.echo", body: ["foo": "bar"])
+        wait(s: 2)
+        XCTAssert(!results.isEmpty)
+        XCTAssert(results.count == 2)
+    }
+
     func testPublishWithHeaders() throws {
         var results = [Message]()
 
@@ -217,8 +248,5 @@ class EventBusTests: XCTestCase {
             XCTAssert(res.body["original-body"]["foo"] == "bar")
             XCTAssert(res.body["original-headers"]["ham"] == "biscuit")
         }
-    }
-
-    func testErrorOnSend() throws {
     }
 }

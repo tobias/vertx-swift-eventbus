@@ -296,9 +296,8 @@ public class EventBus {
             self.handlers[address]![_id] = registration
         } else {
             self.handlers[address] = [_id : registration]
+            try send(JSON(["type": "register", "address": address, "headers": _headers]))
         }
-
-        try send(JSON(["type": "register", "address": address, "headers": _headers]))
 
         return _id
     }

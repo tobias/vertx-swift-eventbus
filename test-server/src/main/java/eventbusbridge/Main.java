@@ -18,7 +18,8 @@ package eventbusbridge;
 import java.io.File;
 import java.io.IOException;
 
-import io.vertx.core.AsyncResultHandler;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
@@ -84,7 +85,7 @@ public class Main {
         });
     }
 
-    static final AsyncResultHandler<Message<JsonObject>> pingPongReply = event -> pingPong(event.result());
+    static final Handler<AsyncResult<Message<JsonObject>>> pingPongReply = event -> pingPong(event.result());
 
     static void pingPong(final Message<JsonObject> m) {
         final int counter = m.body().getInteger("counter");

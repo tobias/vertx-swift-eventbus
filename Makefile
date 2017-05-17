@@ -70,8 +70,8 @@ refetch:
 	swift package fetch
 
 clean:
-	@echo --- Invoking swift build --clean
-	swift build --clean
+	@echo --- Cleaning Swift and test-server builds
+	swift package clean
 	cd test-server && mvn clean
 ifeq ($(UNAME), Linux)
 	rm -f Tests/LinuxMain.swift

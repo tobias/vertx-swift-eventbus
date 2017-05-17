@@ -19,15 +19,15 @@ import Socket
 import SwiftyJSON
 
 class Util {
-    class func readInt32(_ value: NSData) -> Int32 {
+    class func readInt(_ value: NSData) -> Int {
         var result: Int32 = 0
 
         let bytes = UnsafeBufferPointer<UInt8>(start: value.bytes.assumingMemoryBound(to: UInt8.self), count: 4)
         for n in 0...3 {
-            result = result | (Int32(bytes[n]) << (8 * (3 - n)))
+            result = result | (Int32(bytes[n]) << (8 * (3 - Int32(n))))
         }
 
-        return result
+        return Int(result)
     }
 
     class func intToBytes(_ value: Int32) -> [UInt8] {
@@ -56,7 +56,7 @@ class Util {
         let data = NSMutableData()
 
         let cnt = try from.read(into: data)
-        var totalRead: Int32 = 0
+        var totalRead: Int = 0
         if cnt > 0 {
             totalRead += cnt
                 
@@ -65,15 +65,15 @@ class Util {
                 totalRead += try from.read(into: data)
             }
             
-            let msgSize = Util.readInt32(data)
+            let msgSize = Util.readInt(data)
             
             // read until we have a full message
             while totalRead < msgSize + 4 {
                 totalRead += try from.read(into: data)
             }
 
-            //print("TC:  in - \(String(data: data.subdata(with: NSRange(location: 4, length: Int(msgSize))), encoding: String.Encoding.utf8))")
-            return JSON(data: data.subdata(with: NSRange(location: 4, length: Int(msgSize))))
+            //print("TC:  in - \(String(data: data.subdata(with: NSRange(location: 4, length: msgSize)), encoding: String.Encoding.utf8))")
+            return JSON(data: data.subdata(with: NSRange(location: 4, length: msgSize)))
         }
 
         return nil

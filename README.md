@@ -2,8 +2,8 @@ This provides a Swift client for talking to [Vert.x](http://vertx.io)
 via the
 [vertx-tcp-eventbus-bridge](https://github.com/vert-x3/vertx-tcp-eventbus-bridge).
 
-It has only been tested with [Swift 3.0](https://swift.org/download/),
-and only on MacOS X.
+It has only been tested with [Swift 3.1](https://swift.org/download/)
+on MacOS X and Ubuntu.
 
 ## Running the tests
 

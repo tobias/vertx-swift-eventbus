@@ -24,6 +24,8 @@ UNAME = ${shell uname}
 
 TEST_SERVER_PIDFILE = test-server/target/pidfile
 
+GIT_TAG = ${shell git describe --abbrev=0 --tags}
+
 ifeq ($(UNAME), Darwin)
 SWIFTC_FLAGS = 
 LINKER_FLAGS = 
@@ -83,4 +85,18 @@ run: build
 test-server/target/test-server.jar:
 	cd test-server && mvn package
 
+docs: build
+	@echo -- Generating docs for ${GIT_TAG}
+	@echo -- Checking sourcekitten version
+	sourcekitten version
+	@echo -- Checking jazzy version
+	jazzy --version
+	sourcekitten doc --spm-module VertxEventBus > /tmp/VertxEventBus.json
+	jazzy --sourcekitten-sourcefile /tmp/VertxEventBus.json                               \
+	  --module VertxEventBus                                                              \
+	  --author "Toby Crawley"                                                             \
+	  --author_url http://tcrawley.org                                                    \
+	  --github_url https://github.com/tobias/vertx-swift-eventbus                         \
+	  --github-file-prefix https://github.com/tobias/vertx-swift-eventbus/tree/${GIT_TAG} \
+	  --module-version ${GIT_TAG}
 .PHONY: clean build refetch run test 

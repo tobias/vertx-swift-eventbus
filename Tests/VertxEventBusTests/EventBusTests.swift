@@ -158,6 +158,7 @@ class EventBusTests: XCTestCase {
         }
         
         let _ = try self.eb!.register(address: "test.echo.responses", handler: handler)
+        let _ = try self.eb!.register(address: "test.echo.responses", handler: handler)
         
         try self.eb!.send(to: "test.echo", body: ["foo": "bar"])
         wait(s: 2)

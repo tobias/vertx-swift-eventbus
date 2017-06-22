@@ -147,10 +147,9 @@ public class EventBus {
     ///
     /// Note: a new EventBus instance *isn't* connected to the bridge automatically. See `connect()`.
     ///
-    /// - parameters:
-    ///   - <#host#>: host running the bridge
-    ///   - <#port#>: port the bridge is listening on
-    ///   - <#pingEvery#>: interval (in ms) to ping the bridge to ensure it is still up (default: `5000`)
+    /// - parameter host: address of host running the bridge
+    /// - parameter port: port the bridge is listening on
+    /// - parameter pingEvery: interval (in ms) to ping the bridge to ensure it is still up (default: `5000`)
     /// - returns: a new EventBus
     public init(host: String, port: Int, pingEvery: Int = 5000) {
         self.host = host
@@ -217,12 +216,11 @@ public class EventBus {
     /// specified timeout, a `Response` that responds with `false` to
     /// `timeout()` will be passed.
     ///
-    /// - parameters:
-    ///   - <#to#>: the address to send the message to
-    ///   - <#body#>: the body of the message
-    ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)
-    ///   - <#replyTimeout#>: the timeout (in ms) to wait for a reply if a reply callback is provided (default: `30000`)
-    ///   - <#callback#>: the callback to handle the reply or timeout `Response` (default: `nil`)
+    /// - parameter to: the address to send the message to
+    /// - parameter body: the body of the message
+    /// - parameter headers: headers to send with the message (default: `[String: String]()`)
+    /// - parameter replyTimeout: the timeout (in ms) to wait for a reply if a reply callback is provided (default: `30000`)
+    /// - parameter callback: the callback to handle the reply or timeout `Response` (default: `nil`)
     /// - throws: `Error.invalidData(data:)` if the given `body` can't be converted to JSON
     /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge
     public func send(to address: String,
@@ -267,10 +265,9 @@ public class EventBus {
 
     /// Publishes a message to the EventBus.
     ///
-    /// - parameters:
-    ///   - <#to#>: the address to send the message to
-    ///   - <#body#>: the body of the message
-    ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)
+    /// - parameter to: the address to send the message to
+    /// - parameter body: the body of the message
+    /// - parameter headers: headers to send with the message (default: `[String: String]()`)
     /// - throws: `Error.invalidData(data:)` if the given `body` can't be converted to JSON
     /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge    
     public func publish(to address: String,
@@ -284,11 +281,10 @@ public class EventBus {
 
     /// Registers a closure to receive messages for the given address.
     ///
-    /// - parameters:
-    ///   - <#address#>: the address to listen to
-    ///   - <#id#>: the id for the registration (default: a random uuid)
-    ///   - <#headers#>: headers to send with the register request (default: `[String: String]()`)
-    ///   - <#handler#>: the closure to handle each `Message`
+    /// - parameter address: the address to listen to
+    /// - parameter id: the id for the registration (default: a random uuid)
+    /// - parameter headers: headers to send with the register request (default: `[String: String]()`)
+    /// - parameter handler: the closure to handle each `Message`
     /// - returns: an id for the registration that can be used to unregister it
     /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge    
     public func register(address: String,
@@ -310,10 +306,9 @@ public class EventBus {
 
     /// Registers a closure to receive messages for the given address.
     ///
-    /// - parameters:
-    ///   - <#address#>: the address to remove the registration from
-    ///   - <#id#>: the id for the registration 
-    ///   - <#headers#>: headers to send with the unregister request (default: `[String: String]()`)
+    /// - parameter address: the address to remove the registration from
+    /// - parameter id: the id for the registration 
+    /// - parameter headers: headers to send with the unregister request (default: `[String: String]()`)
     /// - returns: `true` if something was actually unregistered
     /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge
     public func unregister(address: String, id: String, headers: [String: String]? = nil) throws -> Bool {
@@ -338,16 +333,26 @@ public class EventBus {
     /// - handling messages received from the remote bridge (can trigger `Error.disconnected(cause:)` or `Error.serverError(message:)`)
     /// - the ping operation discovering the bridge connection has closed (can trigger `Error.disconnected(cause:)`)
     ///
-    /// - parameters:
-    ///   - <#errorHandler#>: a closure that will be passed an `Error` when an error occurs
+    /// - parameter errorHandler: a closure that will be passed an `Error` when an error occurs
     public func register(errorHandler: @escaping (Error) -> ()) {
         self.errorHandler = errorHandler
     }
 
-    // TODO: docs
+    /// Represents error types thrown or passed by EventBus methods.
     public enum Error : Swift.Error {
+        /// Indicates that a given `JSON` object can't be converted to json text.
+        ///
+        /// - parameter data: the offending data object
         case invalidData(data: JSON)
+
+        /// Indicates an error from the bridge server
+        ///
+        /// - parameter message: the error message returned by the server
         case serverError(message: String)
+
+        /// Indicates that the client is now in a disconnected state
+        ///
+        /// - parameter cause: the (optional) underlying cause for the disconnect
         case disconnected(cause: Swift.Error?)
     }
 

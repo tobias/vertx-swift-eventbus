@@ -42,7 +42,6 @@ class Mutex {
     func unlock() {
         pthread_mutex_unlock(&mutex)
     }
-    
 }
     
         

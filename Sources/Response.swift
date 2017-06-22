@@ -14,6 +14,10 @@
  * limitations under the License.
  **/
 
+// Unused import, but works around bug in jazzy doc tool. Without an
+// import, the doc comment for the struct is ignored.
+import Foundation 
+
 /// Represents the response for a reply.
 public struct Response {
     /// The message for the reply.

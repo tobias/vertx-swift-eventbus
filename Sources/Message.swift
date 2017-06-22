@@ -47,11 +47,10 @@ public class Message {
     
     /// Sends back a reply to this message
     ///
-    /// - parameters:
-    ///   - <#body#>: the content of the message
-    ///   - <#headers#>: headers to send with the message (default: `[String: String]()`)
-    ///   - <#replyTimeout#>: the timeout (in ms) to wait for a reply if a reply callback is provided (default: `30000`)
-    ///   - <#callback#>: the callback to handle the reply or timeout `Response` (default: `nil`)
+    /// - parameter body: the content of the message
+    /// - parameter headers: headers to send with the message (default: `[String: String]()`)
+    /// - parameter replyTimeout: the timeout (in ms) to wait for a reply if a reply callback is provided (default: `30000`)
+    /// - parameter callback: the callback to handle the reply or timeout `Response` (default: `nil`)
     /// - throws: `EventBus.Error.invalidData(data:)` if the given `body` can't be converted to JSON
     /// - throws: `EventBus.Error.disconnected(cause:)` if not connected to the remote bridge
     public func reply(body: [String: Any],

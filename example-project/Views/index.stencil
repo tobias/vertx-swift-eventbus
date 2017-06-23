@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>Swift EventBus Client Example</title>
+  </head>
+  <body>
+    <form method="post">
+      <input type="text" name="word">
+      <input type="submit" value="Scramble + Reverse">
+    </form>
+
+    <table border="1">
+      <tr>
+        <th>Word</th><th>Scrambled</th><th>Reversed</th>
+      </tr>
+      {% for word in words %}
+      <tr>
+        <td>{{ word.word }}</td><td>{{ word.scrambled }}</td><td>{{ word.reversed }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
+

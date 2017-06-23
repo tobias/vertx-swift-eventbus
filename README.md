@@ -5,6 +5,8 @@ via the
 It has only been tested with [Swift 3.1](https://swift.org/download/)
 on MacOS X and Ubuntu.
 
+A simple example application is available in [example-project](/example-project).
+
 ## Running the tests
 
 `make test`

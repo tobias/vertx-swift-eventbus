@@ -7,6 +7,15 @@ on MacOS X and Ubuntu.
 
 A simple example application is available in [example-project](/example-project).
 
+## Usage
+
+The latest release is `0.2.0`. To use it with Swift Package Manager,
+add the following to your dependencies in `Package.swift`:
+
+```swift
+.Package(url: "https://github.com/tobias/vertx-swift-eventbus.git", "0.2.0")
+```
+
 ## Running the tests
 
 `make test`

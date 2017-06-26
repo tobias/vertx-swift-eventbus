@@ -96,6 +96,7 @@ docs: build
 	  --module VertxEventBus                                                              \
 	  --author "Toby Crawley"                                                             \
 	  --author_url http://tcrawley.org                                                    \
+	  --root-url http://tobias.github.io/vertx-swift-eventbus/${GIT_TAG}/                 \
 	  --github_url https://github.com/tobias/vertx-swift-eventbus                         \
 	  --github-file-prefix https://github.com/tobias/vertx-swift-eventbus/tree/${GIT_TAG} \
 	  --module-version ${GIT_TAG}                                                         \

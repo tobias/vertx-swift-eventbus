@@ -7,6 +7,8 @@ on MacOS X and Ubuntu.
 
 A simple example application is available in [example-project](/example-project).
 
+The API docs are available at http://tobias.github.io/vertx-swift-eventbus/.
+
 ## Usage
 
 The latest release is `0.2.0`. To use it with Swift Package Manager,

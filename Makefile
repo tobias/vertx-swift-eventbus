@@ -98,5 +98,7 @@ docs: build
 	  --author_url http://tcrawley.org                                                    \
 	  --github_url https://github.com/tobias/vertx-swift-eventbus                         \
 	  --github-file-prefix https://github.com/tobias/vertx-swift-eventbus/tree/${GIT_TAG} \
-	  --module-version ${GIT_TAG}
+	  --module-version ${GIT_TAG}                                                         \
+	  --output docs/${GIT_TAG}
+
 .PHONY: clean build refetch run test 

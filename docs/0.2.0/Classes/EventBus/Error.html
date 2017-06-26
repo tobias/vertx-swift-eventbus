@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Error Enum Reference</title>
+    <link rel="stylesheet" type="text/css" href="../../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../../js/jquery.min.js" defer></script>
+    <script src="../../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Enum/Error" class="dashAnchor"></a>
+    <a title="Error Enum Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../../index.html">VertxEventBus Docs</a> (100% documented)</p>
+        <p class="header-right"><a href="https://github.com/tobias/vertx-swift-eventbus"><img src="../../img/gh.png"/>View on GitHub</a></p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../../index.html">VertxEventBus Reference</a>
+        <img id="carat" src="../../img/carat.png" />
+        Error Enum Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../../Classes/EventBus.html">EventBus</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../Classes/EventBus/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../../Classes/Message.html">Message</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../../Structs.html">Structs</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../../Structs/Response.html">Response</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>Error</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Error</span> <span class="p">:</span> <span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span></code></pre>
+
+                </div>
+              </div>
+            <p>Represents error types thrown or passed by EventBus methods.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FOC13VertxEventBus8EventBus5Error11invalidDataFMS1_FT4dataV10SwiftyJSON4JSON_S1_"></a>
+                    <a name="//apple_ref/swift/Element/invalidData" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FOC13VertxEventBus8EventBus5Error11invalidDataFMS1_FT4dataV10SwiftyJSON4JSON_S1_">invalidData</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Indicates that a given <code>JSON</code> object can&rsquo;t be converted to json text.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">invalidData</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="kt">JSON</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>data</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the offending data object</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/tobias/vertx-swift-eventbus/tree/0.2.0/Sources/EventBus.swift#L346">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FOC13VertxEventBus8EventBus5Error11serverErrorFMS1_FT7messageSS_S1_"></a>
+                    <a name="//apple_ref/swift/Element/serverError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FOC13VertxEventBus8EventBus5Error11serverErrorFMS1_FT7messageSS_S1_">serverError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Indicates an error from the bridge server</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">serverError</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>message</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the error message returned by the server</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/tobias/vertx-swift-eventbus/tree/0.2.0/Sources/EventBus.swift#L351">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FOC13VertxEventBus8EventBus5Error12disconnectedFMS1_FT5causeGSqPs5Error___S1_"></a>
+                    <a name="//apple_ref/swift/Element/disconnected" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FOC13VertxEventBus8EventBus5Error12disconnectedFMS1_FT5causeGSqPs5Error___S1_">disconnected</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Indicates that the client is now in a disconnected state</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">disconnected</span><span class="p">(</span><span class="nv">cause</span><span class="p">:</span> <span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">?)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>cause</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the (optional) underlying cause for the disconnect</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/tobias/vertx-swift-eventbus/tree/0.2.0/Sources/EventBus.swift#L356">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2017 <a class="link" href="http://tcrawley.org" target="_blank" rel="external">Toby Crawley</a>. All rights reserved. (Last updated: 2017-06-26)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

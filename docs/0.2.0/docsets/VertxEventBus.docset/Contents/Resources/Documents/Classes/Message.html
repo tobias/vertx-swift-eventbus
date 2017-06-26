@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Message Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Class/Message" class="dashAnchor"></a>
+    <a title="Message Class Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">VertxEventBus Docs</a> (100% documented)</p>
+        <p class="header-right"><a href="https://github.com/tobias/vertx-swift-eventbus"><img src="../img/gh.png"/>View on GitHub</a></p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">VertxEventBus Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        Message Class Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/EventBus.html">EventBus</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/EventBus/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Message.html">Message</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structs</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/Response.html">Response</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>Message</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">Message</span></code></pre>
+
+                </div>
+              </div>
+            <p>Represents an EventBus message with metadata.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC13VertxEventBus7Message4bodyV10SwiftyJSON4JSON"></a>
+                    <a name="//apple_ref/swift/Property/body" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC13VertxEventBus7Message4bodyV10SwiftyJSON4JSON">body</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The body (content) of the message.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kt">JSON</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/tobias/vertx-swift-eventbus/tree/0.2.0/Sources/Message.swift#L34-L36">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC13VertxEventBus7Message6isSendSb"></a>
+                    <a name="//apple_ref/swift/Property/isSend" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC13VertxEventBus7Message6isSendSb">isSend</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>True if this message was the result of a send (vs. publish)</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isSend</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/tobias/vertx-swift-eventbus/tree/0.2.0/Sources/Message.swift#L39-L46">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC13VertxEventBus7Message5replyFzT4bodyGVs10DictionarySSP__7headersGSqGS1_SSSS__12replyTimeoutSi8callbackGSqFVS_8ResponseT___T_"></a>
+                    <a name="//apple_ref/swift/Method/reply(body:headers:replyTimeout:callback:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC13VertxEventBus7Message5replyFzT4bodyGVs10DictionarySSP__7headersGSqGS1_SSSS__12replyTimeoutSi8callbackGSqFVS_8ResponseT___T_">reply(body:headers:replyTimeout:callback:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Sends back a reply to this message</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code>EventBus.Error.invalidData(data:)</code> if the given <code><a href="../Classes/Message.html#/s:vC13VertxEventBus7Message4bodyV10SwiftyJSON4JSON">body</a></code> can&rsquo;t be converted to JSON
+
+</div>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code>EventBus.Error.disconnected(cause:)</code> if not connected to the remote bridge
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">reply</span><span class="p">(</span><span class="nv">body</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">],</span>
+                      <span class="nv">headers</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">String</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+                      <span class="nv">replyTimeout</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">30000</span><span class="p">,</span> <span class="c1">// 30 seconds</span>
+                      <span class="nv">callback</span><span class="p">:</span> <span class="p">((</span><span class="kt"><a href="../Structs/Response.html">Response</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">())?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>body</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the content of the message</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>headers</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>headers to send with the message (default: <code>[String: String]()</code>)</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>replyTimeout</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the timeout (in ms) to wait for a reply if a reply callback is provided (default: <code>30000</code>)</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the callback to handle the reply or timeout <code>Response</code> (default: <code>nil</code>)</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/tobias/vertx-swift-eventbus/tree/0.2.0/Sources/Message.swift#L56-L64">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2017 <a class="link" href="http://tcrawley.org" target="_blank" rel="external">Toby Crawley</a>. All rights reserved. (Last updated: 2017-06-26)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		73610F3E1F06C66F00685B4D /* EventBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73610F391F06C66F00685B4D /* EventBus.swift */; };
+		73610F3F1F06C66F00685B4D /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73610F3A1F06C66F00685B4D /* Message.swift */; };
+		73610F401F06C66F00685B4D /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73610F3B1F06C66F00685B4D /* Mutex.swift */; };
+		73610F411F06C66F00685B4D /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73610F3C1F06C66F00685B4D /* Response.swift */; };
+		73610F421F06C66F00685B4D /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73610F3D1F06C66F00685B4D /* Util.swift */; };
 		73AE4BC31F06C3EB00AE9231 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AE4BC21F06C3EB00AE9231 /* AppDelegate.swift */; };
 		73AE4BC51F06C3EB00AE9231 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AE4BC41F06C3EB00AE9231 /* ViewController.swift */; };
 		73AE4BC81F06C3EB00AE9231 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73AE4BC61F06C3EB00AE9231 /* Main.storyboard */; };
@@ -15,6 +20,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		73610F391F06C66F00685B4D /* EventBus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventBus.swift; sourceTree = "<group>"; };
+		73610F3A1F06C66F00685B4D /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		73610F3B1F06C66F00685B4D /* Mutex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mutex.swift; sourceTree = "<group>"; };
+		73610F3C1F06C66F00685B4D /* Response.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
+		73610F3D1F06C66F00685B4D /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		73AE4BBF1F06C3EB00AE9231 /* vertx-ios-swift-client.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "vertx-ios-swift-client.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		73AE4BC21F06C3EB00AE9231 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		73AE4BC41F06C3EB00AE9231 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -35,6 +45,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		73610F381F06C66F00685B4D /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				73610F391F06C66F00685B4D /* EventBus.swift */,
+				73610F3A1F06C66F00685B4D /* Message.swift */,
+				73610F3B1F06C66F00685B4D /* Mutex.swift */,
+				73610F3C1F06C66F00685B4D /* Response.swift */,
+				73610F3D1F06C66F00685B4D /* Util.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
 		73AE4BB61F06C3EB00AE9231 = {
 			isa = PBXGroup;
 			children = (
@@ -135,7 +157,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73610F401F06C66F00685B4D /* Mutex.swift in Sources */,
 				73AE4BC51F06C3EB00AE9231 /* ViewController.swift in Sources */,
+				73610F3F1F06C66F00685B4D /* Message.swift in Sources */,
+				73610F3E1F06C66F00685B4D /* EventBus.swift in Sources */,
+				73610F421F06C66F00685B4D /* Util.swift in Sources */,
+				73610F411F06C66F00685B4D /* Response.swift in Sources */,
 				73AE4BC31F06C3EB00AE9231 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

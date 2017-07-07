@@ -17,9 +17,12 @@
 		73AE4BC81F06C3EB00AE9231 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73AE4BC61F06C3EB00AE9231 /* Main.storyboard */; };
 		73AE4BCA1F06C3EB00AE9231 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73AE4BC91F06C3EB00AE9231 /* Assets.xcassets */; };
 		73AE4BCD1F06C3EB00AE9231 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73AE4BCB1F06C3EB00AE9231 /* LaunchScreen.storyboard */; };
+		92F5B6405FE3574C1E0F7EB1 /* Pods_vertx_ios_swift_client.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A44040BF27FD0635F710C34 /* Pods_vertx_ios_swift_client.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3A44040BF27FD0635F710C34 /* Pods_vertx_ios_swift_client.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_vertx_ios_swift_client.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		46BB4521455150F5E9E14E8A /* Pods-vertx-ios-swift-client.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vertx-ios-swift-client.debug.xcconfig"; path = "Pods/Target Support Files/Pods-vertx-ios-swift-client/Pods-vertx-ios-swift-client.debug.xcconfig"; sourceTree = "<group>"; };
 		73610F391F06C66F00685B4D /* EventBus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventBus.swift; sourceTree = "<group>"; };
 		73610F3A1F06C66F00685B4D /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		73610F3B1F06C66F00685B4D /* Mutex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mutex.swift; sourceTree = "<group>"; };
@@ -32,6 +35,7 @@
 		73AE4BC91F06C3EB00AE9231 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		73AE4BCC1F06C3EB00AE9231 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		73AE4BCE1F06C3EB00AE9231 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E08A0182D1CAA364C49AC5A8 /* Pods-vertx-ios-swift-client.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vertx-ios-swift-client.release.xcconfig"; path = "Pods/Target Support Files/Pods-vertx-ios-swift-client/Pods-vertx-ios-swift-client.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92F5B6405FE3574C1E0F7EB1 /* Pods_vertx_ios_swift_client.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,6 +67,8 @@
 			children = (
 				73AE4BC11F06C3EB00AE9231 /* vertx-ios-swift-client */,
 				73AE4BC01F06C3EB00AE9231 /* Products */,
+				E40B6BE017859C2638877A25 /* Pods */,
+				E9F97205EA429042851DCBF3 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -76,6 +83,7 @@
 		73AE4BC11F06C3EB00AE9231 /* vertx-ios-swift-client */ = {
 			isa = PBXGroup;
 			children = (
+				73610F381F06C66F00685B4D /* Sources */,
 				73AE4BC21F06C3EB00AE9231 /* AppDelegate.swift */,
 				73AE4BC41F06C3EB00AE9231 /* ViewController.swift */,
 				73AE4BC61F06C3EB00AE9231 /* Main.storyboard */,
@@ -86,6 +94,23 @@
 			path = "vertx-ios-swift-client";
 			sourceTree = "<group>";
 		};
+		E40B6BE017859C2638877A25 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				46BB4521455150F5E9E14E8A /* Pods-vertx-ios-swift-client.debug.xcconfig */,
+				E08A0182D1CAA364C49AC5A8 /* Pods-vertx-ios-swift-client.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		E9F97205EA429042851DCBF3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3A44040BF27FD0635F710C34 /* Pods_vertx_ios_swift_client.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -93,9 +118,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 73AE4BD11F06C3EB00AE9231 /* Build configuration list for PBXNativeTarget "vertx-ios-swift-client" */;
 			buildPhases = (
+				9AF464DAB12C954D60547DBC /* [CP] Check Pods Manifest.lock */,
 				73AE4BBB1F06C3EB00AE9231 /* Sources */,
 				73AE4BBC1F06C3EB00AE9231 /* Frameworks */,
 				73AE4BBD1F06C3EB00AE9231 /* Resources */,
+				906C22B905AB34E90A47E317 /* [CP] Embed Pods Frameworks */,
+				89777B17ED212552CAA8AA3C /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -151,6 +179,54 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		89777B17ED212552CAA8AA3C /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-vertx-ios-swift-client/Pods-vertx-ios-swift-client-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		906C22B905AB34E90A47E317 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-vertx-ios-swift-client/Pods-vertx-ios-swift-client-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9AF464DAB12C954D60547DBC /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		73AE4BBB1F06C3EB00AE9231 /* Sources */ = {
@@ -284,6 +360,7 @@
 		};
 		73AE4BD21F06C3EB00AE9231 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46BB4521455150F5E9E14E8A /* Pods-vertx-ios-swift-client.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "vertx-ios-swift-client/Info.plist";
@@ -296,6 +373,7 @@
 		};
 		73AE4BD31F06C3EB00AE9231 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E08A0182D1CAA364C49AC5A8 /* Pods-vertx-ios-swift-client.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "vertx-ios-swift-client/Info.plist";
@@ -325,6 +403,7 @@
 				73AE4BD31F06C3EB00AE9231 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

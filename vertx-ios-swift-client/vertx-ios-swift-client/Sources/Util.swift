@@ -15,7 +15,7 @@
  **/
 
 import Foundation
-import Socket
+import BlueSocket
 import SwiftyJSON
 
 class Util {

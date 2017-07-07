@@ -16,7 +16,7 @@
 
 import Dispatch
 import Foundation
-import Socket
+import BlueSocket
 import SwiftyJSON
 
 /// Provides a connection to a remote [TCP EventBus Bridge](https://github.com/vert-x3/vertx-tcp-eventbus-bridge).

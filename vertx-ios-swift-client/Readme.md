@@ -10,11 +10,11 @@ Install cocoapod dependencies
 $ pod install
 ```
 
-Open the *vertx-ios-swift-client.xcworkspace*
+Open the **vertx-ios-swift-client.xcworkspace**  
 (you'll need XCode installed)
 
-Open up Terminal and start up the EventBus bridge,
-which is a Java application
+Open up Terminal and start up the EventBus bridge,  
+which is a Java application  
 (you'll need [Maven](https://maven.apache.org) and Java installed):
 
 ```console

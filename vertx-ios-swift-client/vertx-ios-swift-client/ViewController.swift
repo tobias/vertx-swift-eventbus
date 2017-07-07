@@ -44,5 +44,82 @@ extension ViewController {
             print("Error Registering: " + error.localizedDescription)
         }
     }
+    
+    fileprivate func reply(to message: Message, counter: Int) {
+        guard counter < 7 else { return }
+        
+        print("ping-pong: count is \(counter)")
+        
+        do {
+            try message.reply(body: ["counter": counter + 1]) { response in
+                guard let message = response.message else { return }
+                
+                self.reply(to: message, counter: message.body["counter"].intValue)
+            }
+        } catch let error {
+            print("Error Sending \(counter) Reply: " + error.localizedDescription)
+        }
+    }
 }
 
+// MARK: - IBAction
+extension ViewController {
+    
+    @IBAction fileprivate func replyAction() {
+        do {
+            _ = try eventBus.send(to: "test.ping-pong", body: ["counter": 0]) { response in
+                guard let message = response.message else { return }
+                
+                self.reply(to: message, counter: message.body["counter"].intValue)
+            }
+        } catch let error {
+            print("Error Sending first message: " + error.localizedDescription)
+        }
+    }
+    
+    // MARK: Send
+    @IBAction fileprivate func sendAction() {
+        do {
+            _ = try eventBus.send(to: "test.echo", body: ["foo": "bar"]) { response in
+                guard let body = response.message?.body else { return }
+                
+                print("Send Response: \(body)")
+            }
+        } catch let error {
+            print("Error Sending in \(#function): " + error.localizedDescription)
+        }
+    }
+    
+    @IBAction fileprivate func sendWithHeadersAction() {
+        do {
+            _ = try eventBus.send(to: "test.echo",
+                                  body: ["foo": "bar"],
+                                  headers: ["ham": "biscuit"]) { response in
+                guard let body = response.message?.body else { return }
+                
+                print("Send Response: \(body)")
+            }
+        } catch let error {
+            print("Error Sending in \(#function): " + error.localizedDescription)
+        }
+    }
+    
+    // MARK: Publish
+    @IBAction fileprivate func publishAction() {
+        do {
+            _ = try eventBus.publish(to: "test.echo", body: ["foo": "bar"])
+        } catch let error {
+            print("Error Publishing in \(#function): " + error.localizedDescription)
+        }
+    }
+    
+    @IBAction fileprivate func publishWithHeadersAction() {
+        do {
+            _ = try eventBus.publish(to: "test.echo",
+                                     body: ["foo": "bar"],
+                                     headers: ["ham": "biscuit"])
+        } catch let error {
+            print("Error Publishing in \(#function): " + error.localizedDescription)
+        }
+    }
+}

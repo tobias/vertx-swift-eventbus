@@ -1,12 +1,21 @@
-# Vert.x EventBus bridge sample app
+# Vert.x EventBus bridge iOS client app
 
-This simple app demonstrates the Swift EventBus bridge library. 
+This app demonstrates the Swift EventBus bridge library inside an iOS app. 
 
 ## Running the example
 
-First, you'll need to start up the EventBus bridge, which is a Java
-application (you'll need [Maven](https://maven.apache.org) and Java
-installed):
+Install cocoapod dependencies
+
+```console
+$ pod install
+```
+
+Open the *vertx-ios-swift-client.xcworkspace*
+(you'll need XCode installed)
+
+Open up Terminal and start up the EventBus bridge,
+which is a Java application
+(you'll need [Maven](https://maven.apache.org) and Java installed):
 
 ```console
 $ cd bridge-server
@@ -14,11 +23,4 @@ $ mvn package
 $ java -jar target/bridge-server.jar
 ```
 
-Then you'll need to build and start the Swift application:
-
-```console
-$ make
-```
-
-Finally, point a browser at http://localhost:8080.
-
+Go back to XCode and run the app (⌘R)

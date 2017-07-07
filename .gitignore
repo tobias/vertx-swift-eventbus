@@ -34,7 +34,6 @@ xcuserdata/
 *.cer
 *.mobileprovision
 *.html
-*.xml
 
 ## Obj-C/Swift specific
 *.hmap

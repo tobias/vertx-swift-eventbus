@@ -1,5 +1,5 @@
 
-*Maintainer Wanted - see [here](https://github.com/tobias/vertx-swift-eventbus/issues/11)*
+**Maintainer Wanted - see [here](https://github.com/tobias/vertx-swift-eventbus/issues/11)**
 
 
 

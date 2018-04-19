@@ -1,3 +1,8 @@
+
+## Maintainer Wanted
+
+See [here](https://github.com/tobias/vertx-swift-eventbus/issues/11).
+
 This provides a Swift client for talking to [Vert.x](http://vertx.io)
 via the
 [vertx-tcp-eventbus-bridge](https://github.com/vert-x3/vertx-tcp-eventbus-bridge).

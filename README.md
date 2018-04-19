@@ -1,7 +1,7 @@
 
-## Maintainer Wanted
+*Maintainer Wanted - see [here](https://github.com/tobias/vertx-swift-eventbus/issues/11)*
 
-See [here](https://github.com/tobias/vertx-swift-eventbus/issues/11).
+
 
 This provides a Swift client for talking to [Vert.x](http://vertx.io)
 via the

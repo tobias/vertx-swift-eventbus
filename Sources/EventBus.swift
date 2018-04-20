@@ -34,6 +34,7 @@ public class EventBus {
     private var handlers = [String: [String: Registration]]()
     private var replyHandlers = [String: (Response) -> ()]()
     private let replyHandlersMutex = Mutex(recursive: true)
+    private var disconnecting = false
     
     func readLoop() {
         if connected() {
@@ -165,6 +166,7 @@ public class EventBus {
     public func connect() throws {
         self.socket = try Socket.create()
         try self.socket!.connect(to: self.host, port: self.port)
+        disconnecting = false
         readLoop()
         ping() // ping once to get this party started
         pingLoop()
@@ -181,6 +183,12 @@ public class EventBus {
 
     /// Disconnects from the remote bridge.
     public func disconnect() {
+        if (disconnecting) {
+            // Prevent infinite recursion and crash
+            return
+        }
+
+        disconnecting = true
         if let s = self.socket {
             for handlers in self.handlers.values {
                 for registration in handlers.values {
@@ -191,7 +199,7 @@ public class EventBus {
                                             id: registration.id,
                                             headers: registration.headers)
                 }
-            }   
+            }
             s.close()
             self.socket = nil
         }

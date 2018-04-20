@@ -35,7 +35,7 @@ class Util {
 
         var x = 3
         while x >= 0 {
-            bytes.append(UInt8(value >> Int32(x * 8)))
+            bytes.append(UInt8(0xff & (value >> Int32(x * 8))))
             x -= 1
         }
         

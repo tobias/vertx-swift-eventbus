@@ -68,6 +68,7 @@ public class EventBus {
                 dispatch(msg)
             }
         } catch let error {
+            disconnecting = true
             disconnect()
             handleError(Error.disconnected(cause: error))
         }
@@ -111,7 +112,7 @@ public class EventBus {
         guard let m = message.rawString() else {
             throw Error.invalidData(data: message)
         }
-        
+
         try send(m)
     }
 
@@ -122,6 +123,7 @@ public class EventBus {
         do {
             try Util.write(from: message, to: socket)
         } catch let error {
+            disconnecting = true
             disconnect()
             throw Error.disconnected(cause: error)
         }
@@ -173,31 +175,25 @@ public class EventBus {
 
         for handlers in self.handlers.values {
             for registration in handlers.values {
-                let _ = try register(address: registration.address,
-                                     id: registration.id,
-                                     headers: registration.headers,
-                                     handler: registration.handler)
+                let _ = try reallyRegister(registration)
             }
         }
     }
 
     /// Disconnects from the remote bridge.
     public func disconnect() {
-        if (disconnecting) {
-            // Prevent infinite recursion and crash
-            return
-        }
-
-        disconnecting = true
         if let s = self.socket {
-            for handlers in self.handlers.values {
-                for registration in handlers.values {
-                    // We don't care about errors here, since we're
-                    // not going to be receiving messages anyway. We
-                    // unregister as a convenience to the bridge.
-                    let _ = try? unregister(address: registration.address,
-                                            id: registration.id,
-                                            headers: registration.headers)
+            if !disconnecting {
+                // If disconnecting due to error, skip unregistering.
+                for handlers in self.handlers.values {
+                    for registration in handlers.values {
+                        // We don't care about errors here, since we're
+                        // not going to be receiving messages anyway. We
+                        // unregister as a convenience to the bridge.
+                        let _ = try? unregister(address: registration.address,
+                                                id: registration.id,
+                                                headers: registration.headers)
+                    }
                 }
             }
             s.close()
@@ -294,7 +290,7 @@ public class EventBus {
     /// - parameter headers: headers to send with the register request (default: `[String: String]()`)
     /// - parameter handler: the closure to handle each `Message`
     /// - returns: an id for the registration that can be used to unregister it
-    /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge    
+    /// - throws: `Error.disconnected(cause:)` if not connected to the remote bridge
     public func register(address: String,
                          id: String? = nil,
                          headers: [String: String]? = nil,
@@ -306,10 +302,15 @@ public class EventBus {
             self.handlers[address]![_id] = registration
         } else {
             self.handlers[address] = [_id : registration]
-            try send(JSON(["type": "register", "address": address, "headers": _headers]))
+            try self.reallyRegister(registration)
         }
 
         return _id
+    }
+
+    /// Actually Registers a closure to receive messages for the given address.
+    private func reallyRegister(_ registration: Registration) throws {
+        try send(JSON(["type": "register", "address": registration.address, "headers": registration.headers]))
     }
 
     /// Registers a closure to receive messages for the given address.
@@ -342,7 +343,7 @@ public class EventBus {
     /// - the ping operation discovering the bridge connection has closed (can trigger `Error.disconnected(cause:)`)
     ///
     /// - parameter errorHandler: a closure that will be passed an `Error` when an error occurs
-    public func register(errorHandler: @escaping (Error) -> ()) {
+    public func register(_ errorHandler: @escaping (Error) -> ()) {
         self.errorHandler = errorHandler
     }
 

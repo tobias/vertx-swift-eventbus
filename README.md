@@ -1,3 +1,10 @@
+## nfranke fork
+
+Fixes these issues:
+- Losing connection with the server would cause a stack overflow
+- Upon re-connecting, previous registrations would not successfully be reregistered
+- Util.intToBytes crash was fixed (may be a Swift 4.0-related issue)
+
 This provides a Swift client for talking to [Vert.x](http://vertx.io)
 via the
 [vertx-tcp-eventbus-bridge](https://github.com/vert-x3/vertx-tcp-eventbus-bridge).

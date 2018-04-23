@@ -12,7 +12,7 @@ via the
 It has only been tested with [Swift 3.1](https://swift.org/download/)
 on MacOS X and Ubuntu.
 
-A simple example application is available in [example-project](https://github.com/tobias/vertx-swift-eventbus/tree/master/example-project).
+A simple example application is available in [example-project](https://github.com/nfranke/vertx-swift-eventbus/tree/master/example-project).
 
 The API docs are available at http://tobias.github.io/vertx-swift-eventbus/.
 
@@ -22,7 +22,7 @@ The latest release is `0.2.0`. To use it with Swift Package Manager,
 add the following to your dependencies in `Package.swift`:
 
 ```swift
-.Package(url: "https://github.com/tobias/vertx-swift-eventbus.git", "0.2.0")
+.Package(url: "https://github.com/nfranke/vertx-swift-eventbus.git", "0.2.0")
 ```
 
 ## Running the tests
@@ -53,5 +53,5 @@ The generated docs will be available in `docs/`.
 ## License
 
 vertx-swift-eventbus is licensed under the Apache License, v2. See
-[LICENSE](https://github.com/tobias/vertx-swift-eventbus/blob/master/LICENSE) for details.
+[LICENSE](https://github.com/nfranke/vertx-swift-eventbus/blob/master/LICENSE) for details.
 

@@ -5,24 +5,28 @@ Fixes these issues:
 - Upon re-connecting, previous registrations would not successfully be reregistered
 - Util.intToBytes crash was fixed (may be a Swift 4.0-related issue)
 
+## Description
+
 This provides a Swift client for talking to [Vert.x](http://vertx.io)
 via the
 [vertx-tcp-eventbus-bridge](https://github.com/vert-x3/vertx-tcp-eventbus-bridge).
 
-It has only been tested with [Swift 3.1](https://swift.org/download/)
-on MacOS X and Ubuntu.
+The original version has been tested with [Swift 3.1](https://swift.org/download/)
+on macOS X and Ubuntu.
+
+This fork has been tested on macOS with Swift 4.0 and Xcode 9.2
 
 A simple example application is available in [example-project](https://github.com/nfranke/vertx-swift-eventbus/tree/master/example-project).
 
-The API docs are available at http://tobias.github.io/vertx-swift-eventbus/.
+The API docs are (still) available at http://tobias.github.io/vertx-swift-eventbus/.
 
 ## Usage
 
-The latest release is `0.2.0`. To use it with Swift Package Manager,
+The latest release is `0.2.1`. To use it with Swift Package Manager,
 add the following to your dependencies in `Package.swift`:
 
 ```swift
-.Package(url: "https://github.com/nfranke/vertx-swift-eventbus.git", "0.2.0")
+.Package(url: "https://github.com/nfranke/vertx-swift-eventbus.git", "0.2.1")
 ```
 
 ## Running the tests

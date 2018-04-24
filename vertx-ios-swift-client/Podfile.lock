@@ -1,0 +1,15 @@
+PODS:
+  - BlueSocket (0.12.16)
+  - SwiftyJSON (3.1.4)
+
+DEPENDENCIES:
+  - BlueSocket
+  - SwiftyJSON
+
+SPEC CHECKSUMS:
+  BlueSocket: 13bf1daf94a316e9efe93aa125cc33b8c3dd6c35
+  SwiftyJSON: c2842d878f95482ffceec5709abc3d05680c0220
+
+PODFILE CHECKSUM: a6543bc07b24e7633c24e9b1b75c621ddbc7210e
+
+COCOAPODS: 1.2.1
